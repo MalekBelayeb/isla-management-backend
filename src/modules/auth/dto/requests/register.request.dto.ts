@@ -4,7 +4,8 @@ import { z } from 'zod';
 export const registerRequestDtoSchema = z.object({
   email: z.email(),
   password: z.string(),
-  fullname: z.string(),
+  firstname: z.string(),
+  lastname: z.string(),
 });
 
 export type RegisterRequestDtoType = z.infer<typeof registerRequestDtoSchema>;
@@ -16,5 +17,7 @@ export class RegisterRequestApiBody {
   @ApiProperty({ example: 'test123' })
   password: string;
   @ApiProperty({ example: 'test123' })
-  fullname: string;
+  firstname: string;
+  @ApiProperty({ example: 'test123' })
+  lastname: string;
 }

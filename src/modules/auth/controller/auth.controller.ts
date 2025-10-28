@@ -1,4 +1,14 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import {
   type LoginRequestDtoType,
   loginRequestDtoSchema,
@@ -13,8 +23,14 @@ import {
   type RegisterRequestDtoType,
 } from '../dto/requests/register.request.dto';
 import { ApiResponseDto } from 'src/core/models/api.response.dto';
-import { LoginResponseDto } from '../dto/response/login.response.dto';
+import {
+  LoginResponseApiBody,
+  LoginResponseDto,
+} from '../dto/response/login.response.dto';
 import { AuthUser } from '../dto/response/register.response.dto';
+import { config } from 'src/core/config';
+import { type FastifyReply } from 'fastify';
+import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -28,18 +44,27 @@ export class AuthController {
     required: true,
   })
   @ApiResponse({
-    status: 200,
+    type: LoginResponseApiBody,
+    status: HttpStatus.OK,
     description: 'User successfully logged in',
   })
+  @HttpCode(200)
   async login(
     @Body() loginDto: LoginRequestDtoType,
+    @Res({ passthrough: true }) res: FastifyReply,
   ): Promise<ApiResponseDto<LoginResponseDto>> {
-    const token = await this.authService.login(loginDto);
-
+    const data = await this.authService.login(loginDto);
+    res.setCookie('Authentication', data.token, {
+      httpOnly: true,
+      secure: config.ENV == 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24, // 1 day
+    });
     return {
       statusCode: 200,
       message: 'User successfully logged in',
-      data: { token },
+      data,
     };
   }
 
@@ -59,6 +84,20 @@ export class AuthController {
       statusCode: 200,
       message: 'User created successfully',
       data: user,
+    };
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @Res({ passthrough: true }) res: FastifyReply,
+  ): Promise<ApiResponseDto<null>> {
+    res.clearCookie('Authentication');
+
+    return {
+      statusCode: 200,
+      message: 'User signed out successfully',
+      data: null,
     };
   }
 }

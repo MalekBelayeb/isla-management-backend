@@ -14,6 +14,7 @@ export class ZodValidationPipe implements PipeTransform {
 
   transform(value: any, metadata: ArgumentMetadata) {
     try {
+      if (metadata.type != 'body') return value;
       this.schema.parse(value);
       return value;
     } catch (error) {

@@ -1,3 +1,5 @@
+export const defaultLimitValue = 50;
+
 export const consts = {
   message: {
     error: 'Internal Server Error',

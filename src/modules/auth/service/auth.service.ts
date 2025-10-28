@@ -35,7 +35,10 @@ export class AuthService {
       );
     }
 
-    return this.jwtService.signAsync({ id: user.id });
+    return {
+      id: user.id,
+      token: await this.jwtService.signAsync({ id: user.id }),
+    };
   }
 
   async register(registerDto: RegisterRequestDtoType) {
@@ -44,15 +47,13 @@ export class AuthService {
 
       const newUser = await this.prisma.user.create({
         data: {
-          fullname: registerDto.fullname,
+          firstname: registerDto.firstname,
+          lastname: registerDto.lastname,
           email: registerDto.email,
           password: hashPassword,
         },
-        select: {
-          password: false,
-          id: true,
-          email: true,
-          fullname: true,
+        omit: {
+          password: true,
         },
       });
 
@@ -65,6 +66,7 @@ export class AuthService {
   async validateUser(payload: JwtPayload) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.id },
+      select: { id: true },
     });
     if (user !== null) return user;
     throw new UnauthorizedException();

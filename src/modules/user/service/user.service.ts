@@ -5,7 +5,11 @@ import { PrismaService } from 'src/infrastructure/prisma.infra';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async getUser(id: number) {
-    const user = await this.prisma.user.findFirst({ where: { id } });
+  async getUser(id: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+      omit: { password: true },
+    });
+    return user;
   }
 }

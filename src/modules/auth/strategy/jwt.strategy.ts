@@ -9,9 +9,13 @@ import { JwtPayload } from '../models/jwt-payload.model';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req) => {
+          return req?.cookies?.['Authentication'];
+        },
+      ]),
       ignoreExpiration: false,
-      secretOrKey: config.EXPIRES_IN,
+      secretOrKey: config.JWT_SECRET,
     });
   }
   async validate(payload: JwtPayload) {

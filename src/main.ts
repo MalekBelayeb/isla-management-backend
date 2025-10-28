@@ -8,6 +8,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
 import { GenericExceptionsFilter } from './core/exceptions/generic.exception';
+import { config } from './core/config';
+import fastifyCookie from '@fastify/cookie';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -17,20 +19,28 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GenericExceptionsFilter());
 
-  const config = new DocumentBuilder()
-    .setTitle('FitnessBE')
-    .setDescription('The Fitness BE API description')
+  const configOAI = new DocumentBuilder()
+    .setTitle('IslaManagementBE')
+    .setDescription('The Isla Management BE API description')
     .setVersion('1.0')
-    .addTag('Fitness')
+    .addTag('IslaManagementSystem')
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => SwaggerModule.createDocument(app, configOAI);
   SwaggerModule.setup('api', app, documentFactory);
+
+  await app.register(fastifyCookie, {
+    secret: config.JWT_SECRET, // Optional: used for signed cookies
+  });
 
   await app.register(helmet);
   await app.register(fastifyCsrf);
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:4300',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
