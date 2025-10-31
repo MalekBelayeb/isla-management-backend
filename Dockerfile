@@ -46,6 +46,6 @@ USER node
 EXPOSE 3001
 
 # Run the application.
-CMD ["sh", "-c", "pnpm prisma:migrate && pnpm start:prod"]
+CMD ["sh", "-c", "pnpm prisma:migrate:prod && pnpm start:prod"]
 
 
