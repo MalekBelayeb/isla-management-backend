@@ -26,8 +26,15 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     pnpm install --frozen-lockfile
 
 
+
 # Copy app source
 COPY . .
+
+# 🧩 Run Prisma migration (this also generates the client)
+#RUN pnpm prisma:migrate
+
+# 🏗️ Build your NestJS project (optional if you have dist/)
+RUN pnpm build
 
 # Fix: give node user permission to write dist folder
 RUN chown -R node:node /usr/src/app
@@ -39,4 +46,6 @@ USER node
 EXPOSE 3001
 
 # Run the application.
-CMD pnpm start:prod
+CMD ["sh", "-c", "pnpm prisma:migrate && pnpm start:prod"]
+
+
