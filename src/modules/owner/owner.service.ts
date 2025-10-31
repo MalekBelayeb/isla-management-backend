@@ -45,6 +45,24 @@ export class OwnerService {
     const [owners, total] = await this.prisma.$transaction([
       this.prisma.owner.findMany({
         where: whereCriteria,
+        select: {
+          _count: true,
+          id: true,
+          lastname: true,
+          createdAt: true,
+          email: true,
+          cin: true,
+          firstname: true,
+          fullname: true,
+          matricule: true,
+          phoneNumber: true,
+          nationality: true,
+          properties: {
+            select: {
+              _count: true,
+            },
+          },
+        },
         ...(limit && { take: limit }),
         ...(page && { skip: (page - 1) * (limit ?? 0) }),
         orderBy: {
@@ -53,6 +71,7 @@ export class OwnerService {
       }),
       this.prisma.owner.count({ where: whereCriteria }),
     ]);
+    console.log(owners);
     return { meta: { page, limit, total }, owners };
   }
 

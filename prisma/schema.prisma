@@ -197,19 +197,22 @@ model Agreement {
 }
 
 model Payment {
-  id          String            @id @default(uuid())
-  amount      Decimal
-  paymentDate DateTime          @default(now())
-  category    PaymentCategory
-  type        PaymentType
-  method      PaymentMethodType
-  notes       String            @default("")
-  createdAt   DateTime          @default(now())
-  isArchived  Boolean           @default(false)
-  agreement   Agreement         @relation(fields: [agreementId], references: [id])
-  agreementId String
-  Apartment   Apartment?        @relation(fields: [apartmentId], references: [id])
-  apartmentId String?
-  Tenant      Tenant?           @relation(fields: [tenantId], references: [id])
-  tenantId    String?
+  id            String            @id @default(uuid())
+  amount        Decimal
+  paymentDate   DateTime          @default(now())
+  category      PaymentCategory
+  type          PaymentType
+  method        PaymentMethodType
+  label         String            @default("")
+  rentStartDate DateTime          @default(now())
+  rentEndDate   DateTime          @default(now())
+  notes         String            @default("")
+  createdAt     DateTime          @default(now())
+  isArchived    Boolean           @default(false)
+  agreement     Agreement         @relation(fields: [agreementId], references: [id])
+  agreementId   String
+  Apartment     Apartment?        @relation(fields: [apartmentId], references: [id])
+  apartmentId   String?
+  Tenant        Tenant?           @relation(fields: [tenantId], references: [id])
+  tenantId      String?
 }

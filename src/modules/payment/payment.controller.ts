@@ -45,7 +45,7 @@ export class PaymentController {
   findAll(
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
-    @Query('page', ParseIntPipe) page?: number,
+    @Query('page') page?: number,
     @Query('agreementId') agreementId?: string,
     @Query('apartmentId') apartmentId?: string,
     @Query('tenantId') tenantId?: string,

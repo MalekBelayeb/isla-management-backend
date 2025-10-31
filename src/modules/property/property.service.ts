@@ -34,12 +34,12 @@ export class PropertyService {
         where: whereCriteria,
         select: {
           id: true,
+          _count: true,
           address: true,
           createdAt: true,
           type: true,
           owner: true,
           matricule: true,
-          apartments: true,
         },
         ...(limit && { take: limit }),
         ...(page && { skip: (page - 1) * (limit ?? 0) }),

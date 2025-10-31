@@ -12,11 +12,23 @@ import { ApartmentModule } from './modules/apartment/apartment.module';
 import { PropertyModule } from './modules/property/property.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { PaymentModule } from './modules/payment/payment.module';
-
-const ENV = process.env.NODE_ENV;
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, UserModule, OwnerModule, AgreementModule, ApartmentModule, PropertyModule, TenantModule, PaymentModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    OwnerModule,
+    AgreementModule,
+    ApartmentModule,
+    PropertyModule,
+    TenantModule,
+    PaymentModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+    }),
+  ],
   controllers: [UserController],
   providers: [
     UserService,
