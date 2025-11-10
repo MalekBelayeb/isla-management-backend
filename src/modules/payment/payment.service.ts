@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePaymentDtoType } from './dto/create-payment.dto';
 import { UpdatePaymentDtoType } from './dto/update-payment.dto';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { Prisma } from 'generated/prisma';
+import { PaymentType, Prisma } from 'generated/prisma';
 import { PaymentFindAllArgs } from './types/payment.findAll.type';
 
 @Injectable()
@@ -19,6 +19,13 @@ export class PaymentService {
         category: createPaymentDto.category,
         agreementId: createPaymentDto.agreementId,
         notes: createPaymentDto.notes,
+        label: createPaymentDto.label,
+        ...(createPaymentDto.rentStartDate && {
+          rentStartDate: new Date(createPaymentDto.rentStartDate),
+        }),
+        ...(createPaymentDto.rentEndDate && {
+          rentEndDate: new Date(createPaymentDto.rentEndDate),
+        }),
       },
     });
   }
@@ -50,6 +57,9 @@ export class PaymentService {
           tenantId: true,
           apartmentId: true,
           agreementId: true,
+          label: true,
+          rentStartDate: true,
+          rentEndDate: true,
           agreement: {
             select: {
               id: true,
@@ -133,6 +143,7 @@ export class PaymentService {
         method: updatePaymentDto.method,
         paymentDate: updatePaymentDto.paymentDate,
         type: updatePaymentDto.type,
+        label: updatePaymentDto.label,
         category: updatePaymentDto.category,
         agreementId: updatePaymentDto.agreementId,
         notes: updatePaymentDto.notes,
@@ -145,10 +156,12 @@ export class PaymentService {
     propertyId?: string,
     agreementId?: string,
     apartmentId?: string,
+    type?: PaymentType,
   ) {
     const payments = await this.prisma.payment.findMany({
       where: {
         isArchived: false,
+        ...(type && { type }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && { agreement: { apartment: { propertyId } } }),
         ...(agreementId && { agreementId }),
@@ -158,6 +171,7 @@ export class PaymentService {
         id: true,
         amount: true,
         type: true,
+        label: true,
         category: true,
         method: true,
         createdAt: true,

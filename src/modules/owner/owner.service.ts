@@ -53,6 +53,7 @@ export class OwnerService {
           email: true,
           cin: true,
           firstname: true,
+          gender: true,
           fullname: true,
           matricule: true,
           phoneNumber: true,

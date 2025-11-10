@@ -36,7 +36,7 @@ async function bootstrap() {
   await app.register(helmet);
   await app.register(fastifyCsrf);
   app.enableCors({
-    origin: 'http://localhost:4300',
+    origin: ['http://localhost:4300', 'https://backoffice.isla-immobiliere.tn'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

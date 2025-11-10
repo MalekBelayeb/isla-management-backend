@@ -45,7 +45,7 @@ export class PropertyController {
     @Query('searchTerm') searchTerm?: string,
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
-    @Query('page', ParseIntPipe) page?: number,
+    @Query('page') page?: number,
   ) {
     return this.propertyService.findAll({ searchTerm, limit, page });
   }

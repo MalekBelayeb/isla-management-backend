@@ -27,6 +27,7 @@ import {
   updatePaymentSchema,
 } from './dto/update-payment.dto';
 import { defaultLimitValue } from 'src/shared/contants/constants';
+import { PaymentType } from 'generated/prisma';
 
 @Controller('api/payment')
 export class PaymentController {
@@ -66,12 +67,14 @@ export class PaymentController {
     @Query('propertyId') propertyId?: string,
     @Query('agreementId') agreementId?: string,
     @Query('apartmentId') apartmentId?: string,
+    @Query('type') type?: PaymentType,
   ) {
     return this.paymentService.findFinancialBalance(
       ownerId,
       propertyId,
       agreementId,
       apartmentId,
+      type,
     );
   }
 

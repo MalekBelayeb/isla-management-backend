@@ -216,3 +216,4 @@ model Payment {
   Tenant        Tenant?           @relation(fields: [tenantId], references: [id])
   tenantId      String?
 }
+    

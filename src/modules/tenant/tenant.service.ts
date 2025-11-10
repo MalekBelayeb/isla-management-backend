@@ -12,14 +12,14 @@ export class TenantService {
     await this.prisma.tenant.create({
       data: {
         address: createTenantDto.address,
-        cin: createTenantDto.cin,
+        cin: `${createTenantDto.cin}`,
         firstname: createTenantDto.firstname,
         lastname: createTenantDto.lastname,
         job: createTenantDto.job,
         email: createTenantDto.email,
         fullname: `${createTenantDto.firstname} ${createTenantDto.lastname}`,
         nationality: createTenantDto.nationality,
-        phoneNumber: createTenantDto.phoneNumber,
+        phoneNumber: `${createTenantDto.phoneNumber}`,
         gender: createTenantDto.gender,
       },
     });

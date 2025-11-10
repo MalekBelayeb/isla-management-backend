@@ -1,17 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GenderType, PropertyType } from 'generated/prisma';
+import { GenderType, NationalityType, PropertyType } from 'generated/prisma';
 import { z } from 'zod';
 
 export const createTenantDtoSchema = z.object({
   firstname: z.string(),
   lastname: z.string(),
-  cin: z.string(),
-  phoneNumber: z.string(),
-  nationality: z.string(),
-  address: z.string(),
-  job: z.string(),
-  email: z.string(),
+  label: z.string(),
+  cin: z.coerce.string(),
+  rentStartDate: z.coerce.date(),
+  rentEndDate: z.coerce.date(),
+  phoneNumber: z.coerce.string(),
+  nationality: z.enum(NationalityType),
   gender: z.enum(GenderType),
+  address: z.string().optional(),
+  job: z.string().optional(),
+  email: z.string().optional(),
 });
 
 export type CreateTenantDtoType = z.infer<typeof createTenantDtoSchema>;
