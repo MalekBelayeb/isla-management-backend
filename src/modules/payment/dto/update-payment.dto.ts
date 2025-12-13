@@ -11,7 +11,7 @@ export const updatePaymentSchema = z.object({
   method: z.enum(PaymentMethodType),
   category: z.enum(PaymentCategory),
   agreementId: z.string(),
-  label: z.string(),
+  label: z.string().optional(),
   paymentDate: z.coerce.date().optional(),
   notes: z.string().optional(),
 });

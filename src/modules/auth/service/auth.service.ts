@@ -68,7 +68,6 @@ export class AuthService {
       where: { id: payload.id },
       select: { id: true },
     });
-    if (user !== null) return user;
-    throw new UnauthorizedException();
+    return user;
   }
 }

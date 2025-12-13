@@ -44,11 +44,21 @@ export class TenantController {
   @UseGuards(JwtAuthGuard)
   findAll(
     @Query('searchTerm') searchTerm?: string,
+    @Query('apartmentId') apartmentId?: string,
+    @Query('statusTenant') statusTenant?: string,
+    @Query('agreementId') agreementId?: string,
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
     @Query('page') page?: number,
   ) {
-    return this.tenantService.findAll({ searchTerm, limit, page });
+    return this.tenantService.findAll({
+      searchTerm,
+      agreementId,
+      apartmentId,
+      statusTenant,
+      limit,
+      page,
+    });
   }
 
   @Get(':id')

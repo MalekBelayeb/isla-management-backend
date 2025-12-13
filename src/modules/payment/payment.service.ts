@@ -34,16 +34,41 @@ export class PaymentService {
     agreementId,
     apartmentId,
     tenantId,
+    startDate,
+    endDate,
+    paymentMethod,
     limit,
     page,
   }: PaymentFindAllArgs) {
+    let createdAtCriteria;
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      end.setHours(23, 59, 59, 999);
+      createdAtCriteria = startDate &&
+        endDate && {
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        };
+    }
+
     const whereCriteria = {
       isArchived: false,
-      ...(apartmentId && { agreement: { apartmentId } }),
-      ...(tenantId && { agreement: { tenantId } }),
-      ...(agreementId && { agreementId }),
+      ...(createdAtCriteria && createdAtCriteria),
+      ...((apartmentId || tenantId || agreementId || paymentMethod) && {
+        OR: [
+          apartmentId && { agreement: { apartmentId } },
+          tenantId && { agreement: { tenantId } },
+          agreementId && { agreementId },
+          paymentMethod && { method: paymentMethod },
+        ].filter(Boolean),
+      }),
     } as Prisma.PaymentWhereInput;
-
+    console.log(whereCriteria);
     const [payments, total] = await this.prisma.$transaction([
       this.prisma.payment.findMany({
         where: whereCriteria,
@@ -70,6 +95,11 @@ export class PaymentService {
                   matricule: true,
                   address: true,
                   type: true,
+                  property: {
+                    select: {
+                      matricule: true,
+                    },
+                  },
                 },
               },
               tenant: {
@@ -106,6 +136,7 @@ export class PaymentService {
         type: true,
         method: true,
         category: true,
+        label: true,
         createdAt: true,
         agreement: {
           select: {
@@ -188,6 +219,11 @@ export class PaymentService {
                 matricule: true,
                 address: true,
                 type: true,
+                property: {
+                  select: {
+                    matricule: true,
+                  },
+                },
               },
             },
             tenant: {

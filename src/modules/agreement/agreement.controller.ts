@@ -48,12 +48,19 @@ export class AgreementController {
     limit?: number,
     @Query('apartmentId') apartmentId?: string,
     @Query('tenantId') tenantId?: string,
+    @Query('agreementStatus')
+    agreementStatus?: 'active' | 'expired' | 'suspended',
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('page') page?: number,
   ) {
     return this.agreementService.findAll({
       searchTerm,
       apartmentId,
       tenantId,
+      agreementStatus,
+      startDate,
+      endDate,
       limit,
       page,
     });

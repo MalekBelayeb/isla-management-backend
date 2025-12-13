@@ -50,11 +50,17 @@ export class PaymentController {
     @Query('agreementId') agreementId?: string,
     @Query('apartmentId') apartmentId?: string,
     @Query('tenantId') tenantId?: string,
+    @Query('paymentMethod') paymentMethod?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     return this.paymentService.findAll({
       agreementId,
       apartmentId,
       tenantId,
+      paymentMethod,
+      startDate,
+      endDate,
       limit,
       page,
     });

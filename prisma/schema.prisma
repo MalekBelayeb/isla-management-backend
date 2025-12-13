@@ -176,6 +176,7 @@ model Agreement {
   id                String           @id @default(uuid())
   matricule         String
   rentAmount        Decimal
+  nbDaysOfTolerance Int              @default(10)
   deposit           Decimal? // optional amount paid as deposit (caution).
   firstDayOfPayment DateTime?
   paymentFrequency  PaymentFrequency @default(MONTHLY)
@@ -216,4 +217,3 @@ model Payment {
   Tenant        Tenant?           @relation(fields: [tenantId], references: [id])
   tenantId      String?
 }
-    

@@ -45,12 +45,25 @@ export class ApartmentController {
   @UseGuards(JwtAuthGuard)
   findAll(
     @Query('searchTerm') searchTerm?: string,
+    @Query('propertyMatricule') propertyMatricule?: number,
+    @Query('matricule') matricule?: number,
+    @Query('ownerId') ownerId?: string,
+    @Query('rentStatus') rentStatus?: string,
     @Query('type') type?: ApartmentType,
     @Query('page') page?: number,
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
   ) {
-    return this.apartmentService.findAll({ searchTerm, type, limit, page });
+    return this.apartmentService.findAll({
+      searchTerm,
+      propertyMatricule,
+      matricule,
+      ownerId,
+      type,
+      rentStatus,
+      limit,
+      page,
+    });
   }
 
   @Get(':id')

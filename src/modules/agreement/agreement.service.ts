@@ -16,6 +16,7 @@ export class AgreementService {
         startDate: createAgreementDto.startDate,
         expireDate: createAgreementDto.expireDate,
         notes: createAgreementDto.notes,
+        nbDaysOfTolerance: createAgreementDto.nbDaysOfTolerance,
         apartmentId: createAgreementDto.apartmentId,
         tenantId: createAgreementDto.tenantId,
         deposit: createAgreementDto.deposit,
@@ -31,15 +32,60 @@ export class AgreementService {
     searchTerm,
     apartmentId,
     tenantId,
+    startDate,
+    endDate,
+    agreementStatus,
     limit,
     page,
   }: AgreementFindAllArgs) {
+    let createdAtCriteria;
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      end.setHours(23, 59, 59, 999);
+      createdAtCriteria = startDate &&
+        endDate && {
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        };
+    }
     const whereCriteria = {
       isArchived: false,
-      ...(searchTerm && { matricule: { contains: searchTerm } }),
-      ...(apartmentId && { apartmentId: apartmentId }),
-      ...(tenantId && { tenantId: tenantId }),
+
+      ...(createdAtCriteria && createdAtCriteria),
+
+      ...((apartmentId || tenantId || searchTerm || agreementStatus) && {
+        OR: [
+          searchTerm && { matricule: searchTerm },
+          apartmentId && { apartmentId },
+          tenantId && { tenantId },
+          agreementStatus &&
+            agreementStatus === 'active' && {
+              expireDate: {
+                gte: new Date(),
+              },
+              startDate: {
+                lte: new Date(),
+              },
+            },
+          agreementStatus &&
+            agreementStatus === 'expired' && {
+              expireDate: {
+                lte: new Date(),
+              },
+            },
+          agreementStatus &&
+            agreementStatus === 'suspended' && {
+              status: 'TERMINATED',
+            },
+        ].filter(Boolean),
+      }),
     } as Prisma.AgreementWhereInput;
+    console.log(JSON.stringify(whereCriteria));
 
     const [agreements, total] = await this.prisma.$transaction([
       this.prisma.agreement.findMany({
@@ -50,6 +96,7 @@ export class AgreementService {
           startDate: true,
           expireDate: true,
           status: true,
+          nbDaysOfTolerance: true,
           paymentFrequency: true,
           matricule: true,
           createdAt: true,
@@ -92,6 +139,7 @@ export class AgreementService {
         expireDate: true,
         status: true,
         paymentFrequency: true,
+        nbDaysOfTolerance: true,
         matricule: true,
         createdAt: true,
         signedAt: true,
@@ -128,6 +176,7 @@ export class AgreementService {
         terminationReason: updateAgreementDto.terminationReason,
         startDate: updateAgreementDto.startDate,
         expireDate: updateAgreementDto.expireDate,
+        nbDaysOfTolerance: updateAgreementDto.nbDaysOfTolerance,
         notes: updateAgreementDto.notes,
         apartmentId: updateAgreementDto.apartmentId,
         tenantId: updateAgreementDto.tenantId,

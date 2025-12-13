@@ -35,10 +35,10 @@ export class OwnerService {
       isArchived: false,
       ...(searchTerm && {
         OR: [
-          { fullname: { contains: searchTerm } },
-          { email: { contains: searchTerm } },
-          { phoneNumber: { contains: searchTerm } },
-          { cin: { contains: searchTerm } },
+          { fullname: { contains: searchTerm, mode: 'insensitive'  } },
+          { email: { contains: searchTerm, mode: 'insensitive' } },
+          { phoneNumber: { contains: searchTerm, mode: 'insensitive' } },
+          { cin: { contains: searchTerm, mode: 'insensitive' } },
         ],
       }),
     } as Prisma.OwnerWhereInput;
@@ -53,7 +53,7 @@ export class OwnerService {
           email: true,
           cin: true,
           firstname: true,
-          gender: true,
+          gender: true, 
           fullname: true,
           matricule: true,
           phoneNumber: true,

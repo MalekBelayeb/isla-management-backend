@@ -18,12 +18,29 @@ export class PropertyService {
     });
   }
 
-  async findAll({ searchTerm, limit, page }: PropertyFindAllArgs) {
+  async findAll({
+    searchTerm,
+    ownerId,
+    type,
+    matricule,
+    limit,
+    page,
+  }: PropertyFindAllArgs) {
     const whereCriteria = {
       isArchived: false,
       ...(searchTerm && {
         OR: [{ address: { contains: searchTerm } }],
       }),
+      ...(ownerId && {
+        ownerId,
+      }),
+      ...(type && {
+        type,
+      }),
+      ...(matricule &&
+        !isNaN(matricule) && {
+          matricule: Number(matricule),
+        }),
       ...(searchTerm &&
         !isNaN(+searchTerm) && {
           OR: [{ matricule: +searchTerm }],
@@ -61,6 +78,7 @@ export class PropertyService {
         createdAt: true,
         type: true,
         owner: true,
+        matricule: true,
         apartments: true,
       },
     });

@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateTenantDtoType } from './dto/create-tenant.dto';
 import { UpdateTenantDtoType } from './dto/update-tenant.dto';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { Prisma } from 'generated/prisma';
+import { Prisma, Tenant } from 'generated/prisma';
 import { TenantFindAllArgs } from './types/tenant.findAll.type';
+import { TenantMapper } from './mappers/tenants.mapper';
 
 @Injectable()
 export class TenantService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private tenantsMapper: TenantMapper,
+  ) {}
   async create(createTenantDto: CreateTenantDtoType) {
     await this.prisma.tenant.create({
       data: {
@@ -25,28 +29,78 @@ export class TenantService {
     });
   }
 
-  async findAll({ searchTerm, limit, page }: TenantFindAllArgs) {
+  async findAll({
+    searchTerm,
+    agreementId,
+    apartmentId,
+    statusTenant,
+    limit,
+    page,
+  }: TenantFindAllArgs) {
+    const now = new Date();
+    const firstDayOfCurrentMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+    );
+    const firstDayOfCurrentMonthWithTolerenceDays = new Date(
+      firstDayOfCurrentMonth,
+    );
+
+    firstDayOfCurrentMonthWithTolerenceDays.setDate(
+      firstDayOfCurrentMonth.getDate(),
+    );
+
     const whereCriteria = {
-      isArchived: false,
       ...(searchTerm &&
         !isNaN(+searchTerm) && {
           OR: [
             { matricule: +searchTerm },
-            { phoneNumber: { contains: searchTerm } },
-            { cin: { contains: searchTerm } },
+            { phoneNumber: { contains: searchTerm, mode: 'insensitive'} },
+            { cin: { contains: searchTerm, mode: 'insensitive' } },
           ],
         }),
-      ...(searchTerm && {
-        OR: [
-          { fullname: { contains: searchTerm } },
-          { email: { contains: searchTerm } },
-        ],
+      ...(searchTerm &&
+        isNaN(+searchTerm) && {
+          OR: [
+            { fullname: { contains: searchTerm, mode: 'insensitive' } },
+            { email: { contains: searchTerm, mode: 'insensitive' } },
+            { address: { contains: searchTerm, mode: 'insensitive' } },
+          ],
+        }),
+      ...(agreementId && {
+        agreements: { some: { id: agreementId } },
       }),
+      ...(apartmentId && {
+        agreements: { some: { apartment: { id: apartmentId } } },
+      }),
+      ...(statusTenant &&
+        statusTenant === 'latePayers' && {
+          agreements: {
+            some: {
+              status: 'ACTIVE',
+              isArchived: false,
+              paymentFrequency: 'MONTHLY',
+              expireDate: {
+                gte: new Date(),
+              },
+              payments: {
+                none: {
+                  isArchived: false,
+                  type: 'income',
+                  rentStartDate: {
+                    gte: firstDayOfCurrentMonth,
+                  },
+                },
+              },
+            },
+          },
+        }),
     } as Prisma.TenantWhereInput;
 
     const [tenants, total] = await this.prisma.$transaction([
       this.prisma.tenant.findMany({
-        where: whereCriteria,
+        where: { isArchived: false, ...whereCriteria },
         select: {
           id: true,
           address: true,
@@ -62,6 +116,7 @@ export class TenantService {
           matricule: true,
           nationality: true,
           agreements: {
+            where: { isArchived: false },
             orderBy: {
               createdAt: 'desc',
             },
@@ -70,7 +125,20 @@ export class TenantService {
               id: true,
               matricule: true,
               startDate: true,
+              expireDate: true,
+              status: true,
+              nbDaysOfTolerance: true,
               createdAt: true,
+              payments: {
+                where: {
+                  type: 'income',
+                  isArchived: false,
+                },
+                orderBy: {
+                  createdAt: 'desc',
+                },
+                take: 1,
+              },
               apartment: {
                 select: {
                   id: true,
@@ -90,12 +158,23 @@ export class TenantService {
       }),
       this.prisma.tenant.count({ where: whereCriteria }),
     ]);
-    return { meta: { page, limit, total }, tenants };
+
+    let results = this.tenantsMapper.addStatusToTenants(tenants);
+
+    return { meta: { page, limit, total }, tenants: results };
   }
 
   async findOne(id: string) {
     const tenant = await this.prisma.tenant.findFirst({
       where: { id, isArchived: false },
+      include: {
+        agreements: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
     });
     return tenant;
   }

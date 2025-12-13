@@ -43,11 +43,21 @@ export class PropertyController {
   @UseGuards(JwtAuthGuard)
   findAll(
     @Query('searchTerm') searchTerm?: string,
+    @Query('type') type?: string,
+    @Query('ownerId') ownerId?: string,
+    @Query('matricule') matricule?: number,
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
     @Query('page') page?: number,
   ) {
-    return this.propertyService.findAll({ searchTerm, limit, page });
+    return this.propertyService.findAll({
+      searchTerm,
+      matricule,
+      type,
+      ownerId,
+      limit,
+      page,
+    });
   }
 
   @Get(':id')

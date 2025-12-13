@@ -4,10 +4,14 @@ import { CreateApartmentDtoType } from './dto/create-apartment.dto';
 import { UpdateApartmentDtoType } from './dto/update-apartment.dto';
 import { ApartmentType, Prisma } from 'generated/prisma';
 import { ApartmentFindAllArgs } from './types/apartment.findAll.type';
+import { ApartmentMapper } from './mapper/apartment.mapper';
 
 @Injectable()
 export class ApartmentService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private apartmentMapper: ApartmentMapper,
+  ) {}
   async create(createApartmentDto: CreateApartmentDtoType) {
     await this.prismaService.apartment.create({
       data: {
@@ -20,18 +24,58 @@ export class ApartmentService {
     });
   }
 
-  async findAll({ searchTerm, type, limit, page }: ApartmentFindAllArgs) {
+  async findAll({
+    searchTerm,
+    type,
+    matricule,
+    propertyMatricule,
+    ownerId,
+    rentStatus,
+    limit,
+    page,
+  }: ApartmentFindAllArgs) {
     const whereCriteria = {
       isArchived: false,
       ...(searchTerm && {
-        OR: [{ address: { contains: searchTerm } }],
+        OR: [{ address: { contains: searchTerm, mode: 'insensitive' } }],
       }),
       ...(type && {
         type,
       }),
-      ...(searchTerm &&
-        !isNaN(+searchTerm) && {
-          OR: [{ matricule: +searchTerm }],
+      ...(matricule &&
+        !isNaN(matricule) && {
+          matricule: Number(matricule),
+        }),
+      ...(ownerId && {
+        property: { ownerId },
+      }),
+      ...(propertyMatricule &&
+        !isNaN(propertyMatricule) && {
+          property: { matricule: Number(propertyMatricule) },
+        }),
+      ...(rentStatus &&
+        rentStatus === 'rented' && {
+          agreements: {
+            some: {
+              status: 'ACTIVE',
+              isArchived: false,
+              expireDate: {
+                gte: new Date(),
+              },
+            },
+          },
+        }),
+      ...(rentStatus &&
+        rentStatus === 'notRented' && {
+          agreements: {
+            none: {
+              status: 'ACTIVE',
+              isArchived: false,
+              expireDate: {
+                gte: new Date(),
+              },
+            },
+          },
         }),
     } as Prisma.ApartmentWhereInput;
 
@@ -46,6 +90,14 @@ export class ApartmentService {
           rooms: true,
           type: true,
           description: true,
+          createdAt: true,
+          agreements: {
+            where: { isArchived: false },
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
+          },
           property: {
             select: {
               id: true,
@@ -70,7 +122,9 @@ export class ApartmentService {
       }),
       this.prismaService.apartment.count({ where: whereCriteria }),
     ]);
-    return { meta: { page, limit, total }, apartments };
+
+    const results = this.apartmentMapper.addRentStatusToApartments(apartments);
+    return { meta: { page, limit, total }, apartments: results };
   }
 
   async findOne(id: string) {
@@ -83,6 +137,7 @@ export class ApartmentService {
         price: true,
         rooms: true,
         type: true,
+        createdAt: true,
         description: true,
         property: {
           select: {

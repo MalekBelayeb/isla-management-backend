@@ -12,6 +12,7 @@ export const updateTenantDtoSchema = z.object({
   job: z.string(),
   email: z.string(),
   gender: z.enum(GenderType),
+  label: z.string().optional(),
 });
 
 export type UpdateTenantDtoType = z.infer<typeof updateTenantDtoSchema>;

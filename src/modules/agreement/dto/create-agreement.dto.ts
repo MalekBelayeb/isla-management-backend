@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const createAgreementSchema = z.object({
   matricule: z.string(),
   rentAmount: z.number(),
+  nbDaysOfTolerance: z.number(),
   startDate: z.coerce.date(),
   expireDate: z.coerce.date(),
   firstDayOfPayment: z.coerce.date().optional(),
@@ -24,6 +25,8 @@ export class CreateAgreementDtoApiBody {
   matricule: string;
   @ApiProperty({ example: 50 })
   rentAmount: string;
+  @ApiProperty({ example: 10 })
+  nbDaysOfTolerance: number;
   @ApiProperty({ example: 20 })
   deposit: string;
   @ApiProperty({ example: '55331144' })
