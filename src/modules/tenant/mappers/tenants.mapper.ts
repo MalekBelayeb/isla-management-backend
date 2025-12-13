@@ -19,20 +19,37 @@ export class TenantMapper {
 
       let status = 'IN_GOOD_STANDING';
 
+      console.log(agreement);
       if (!agreement) {
         status = 'NO_AGREEMENT';
+        return {
+          ...item,
+          status,
+        };
       }
 
       if (!payment) {
         status = 'NO_PAYMENT';
+        return {
+          ...item,
+          status,
+        };
       }
 
       if (agreement?.status === 'TERMINATED') {
         status = 'TERMINATED';
+        return {
+          ...item,
+          status,
+        };
       }
 
       if (new Date(agreement?.expireDate) < new Date()) {
         status = 'AGREEMENT_EXPIRED';
+        return {
+          ...item,
+          status,
+        };
       }
 
       if (
@@ -40,6 +57,10 @@ export class TenantMapper {
         !this.isDateInCurrentMonth(new Date(payment.rentStartDate))
       ) {
         status = 'PAYMENT_DEFAULT';
+        return {
+          ...item,
+          status,
+        };
       }
       return {
         ...item,
