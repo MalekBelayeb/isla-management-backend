@@ -22,6 +22,8 @@ export class OwnerService {
           phoneNumber: createOwnerDto.phoneNumber,
           rib: createOwnerDto.rib,
           type: createOwnerDto.type,
+          taxId: createOwnerDto.taxId,
+          society: createOwnerDto.society,
         },
       });
       return newOwner;
@@ -35,9 +37,10 @@ export class OwnerService {
       isArchived: false,
       ...(searchTerm && {
         OR: [
-          { fullname: { contains: searchTerm, mode: 'insensitive'  } },
+          { fullname: { contains: searchTerm, mode: 'insensitive' } },
           { email: { contains: searchTerm, mode: 'insensitive' } },
           { phoneNumber: { contains: searchTerm, mode: 'insensitive' } },
+          { society: { contains: searchTerm, mode: 'insensitive' } },
           { cin: { contains: searchTerm, mode: 'insensitive' } },
         ],
       }),
@@ -53,12 +56,18 @@ export class OwnerService {
           email: true,
           cin: true,
           firstname: true,
-          gender: true, 
+          gender: true,
           fullname: true,
           matricule: true,
           phoneNumber: true,
+          type: true,
+          taxId: true,
+          society: true,
           nationality: true,
           properties: {
+            where: {
+              isArchived: false,
+            },
             select: {
               _count: true,
             },
@@ -72,7 +81,7 @@ export class OwnerService {
       }),
       this.prisma.owner.count({ where: whereCriteria }),
     ]);
-    console.log(owners);
+
     return { meta: { page, limit, total }, owners };
   }
 
@@ -96,6 +105,8 @@ export class OwnerService {
         phoneNumber: updateOwnerDto.phoneNumber,
         rib: updateOwnerDto.rib,
         type: updateOwnerDto.type,
+        taxId: updateOwnerDto.taxId,
+        society: updateOwnerDto.society,
       },
     });
     return updatedOwner;

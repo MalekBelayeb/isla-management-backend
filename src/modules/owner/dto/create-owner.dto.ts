@@ -2,12 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { z } from 'zod';
 
 export const createOwnerDtoSchema = z.object({
-  email: z.email(),
+  email: z.email().optional(),
+  society: z.string().optional(),
+  taxId: z.string().optional(),
   firstname: z.string(),
   lastname: z.string(),
   phoneNumber: z.string(),
   nationality: z.enum(['tn', 'dz', 'ly', 'others']),
-  gender: z.enum(['M', 'F']),
+  gender: z.enum(['M', 'F']).optional(),
   cin: z.string(),
   rib: z.string(),
   type: z.enum(['natural', 'legal']),

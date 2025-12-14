@@ -12,8 +12,8 @@ export const createPaymentSchema = z.object({
   method: z.enum(PaymentMethodType),
   agreementId: z.string(),
   label: z.string().optional(),
-  rentStartDate: z.string().optional(),
-  rentEndDate: z.string().optional(),
+  rentStartDate: z.coerce.date().optional(),
+  rentEndDate: z.coerce.date().optional(),
   paymentDate: z.coerce.date().optional(),
   notes: z.string().optional(),
 });

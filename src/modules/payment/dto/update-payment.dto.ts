@@ -13,6 +13,8 @@ export const updatePaymentSchema = z.object({
   agreementId: z.string(),
   label: z.string().optional(),
   paymentDate: z.coerce.date().optional(),
+  rentStartDate: z.coerce.date().optional(),
+  rentEndDate: z.coerce.date().optional(),
   notes: z.string().optional(),
 });
 

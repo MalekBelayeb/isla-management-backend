@@ -127,7 +127,7 @@ export class PaymentService {
   }
 
   async findOne(id: string) {
-    const agreement = await this.prisma.payment.findFirst({
+    const payment = await this.prisma.payment.findFirst({
       where: { id, isArchived: false },
 
       select: {
@@ -137,6 +137,8 @@ export class PaymentService {
         method: true,
         category: true,
         label: true,
+        rentStartDate: true,
+        rentEndDate: true,
         createdAt: true,
         agreement: {
           select: {
@@ -161,7 +163,7 @@ export class PaymentService {
         },
       },
     });
-    return agreement;
+    return payment;
   }
 
   async update(id: string, updatePaymentDto: UpdatePaymentDtoType) {
@@ -178,6 +180,8 @@ export class PaymentService {
         category: updatePaymentDto.category,
         agreementId: updatePaymentDto.agreementId,
         notes: updatePaymentDto.notes,
+        rentStartDate: updatePaymentDto.rentStartDate,
+        rentEndDate: updatePaymentDto.rentEndDate,
       },
     });
   }
@@ -245,6 +249,7 @@ export class PaymentService {
       _sum: { amount: true },
       where: {
         isArchived: false,
+        ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && { agreement: { apartment: { propertyId } } }),
         ...(agreementId && { agreementId }),
         ...(apartmentId && { agreement: { apartmentId } }),

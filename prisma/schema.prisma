@@ -174,7 +174,7 @@ model Tenant {
 
 model Agreement {
   id                String           @id @default(uuid())
-  matricule         String
+  matricule         Int           @default(autoincrement())
   rentAmount        Decimal
   nbDaysOfTolerance Int              @default(10)
   deposit           Decimal? // optional amount paid as deposit (caution).

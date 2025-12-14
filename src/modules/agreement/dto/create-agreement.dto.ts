@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AgreementStatus, PaymentFrequency } from 'generated/prisma';
 import { z } from 'zod';
 export const createAgreementSchema = z.object({
-  matricule: z.string(),
+  //matricule: z.string(),
   rentAmount: z.number(),
-  nbDaysOfTolerance: z.number(),
+  nbDaysOfTolerance: z.number().optional(),
   startDate: z.coerce.date(),
   expireDate: z.coerce.date(),
   firstDayOfPayment: z.coerce.date().optional(),
