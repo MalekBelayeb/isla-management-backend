@@ -5,6 +5,7 @@ export type ApartmentFindAllArgs = {
   matricule?: number;
   propertyMatricule?: number;
   ownerId?: string;
+  propertyId?: string;
   rentStatus?: string;
   type?: ApartmentType;
   limit?: number;

@@ -30,6 +30,7 @@ export class ApartmentService {
     matricule,
     propertyMatricule,
     ownerId,
+    propertyId,
     rentStatus,
     limit,
     page,
@@ -48,6 +49,9 @@ export class ApartmentService {
         }),
       ...(ownerId && {
         property: { ownerId },
+      }),
+      ...(propertyId && {
+        propertyId,
       }),
       ...(propertyMatricule &&
         !isNaN(propertyMatricule) && {

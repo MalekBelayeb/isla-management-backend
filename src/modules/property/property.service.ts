@@ -51,7 +51,13 @@ export class PropertyService {
         where: whereCriteria,
         select: {
           id: true,
-          _count: true,
+          apartments: {
+            select: {
+              address: true,
+              matricule: true,
+            },
+            where: { isArchived: false },
+          },
           address: true,
           createdAt: true,
           type: true,
