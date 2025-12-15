@@ -27,7 +27,7 @@ export class AgreementService {
         },
       },
     });
-
+    console.log(tenantWithActiveAgreement);
     if (tenantWithActiveAgreement?.agreements?.length) {
       throw new HttpException(
         consts.message.tenantAlreadyHasAgreement,
@@ -126,12 +126,13 @@ export class AgreementService {
       isArchived: false,
 
       ...(createdAtCriteria && createdAtCriteria),
-      ...((agreementProperty && !isNaN(+agreementProperty)) && {
-        apartment: {
-          isArchived: false,
-          property: { matricule: Number(agreementProperty) },
-        },
-      }),
+      ...(agreementProperty &&
+        !isNaN(+agreementProperty) && {
+          apartment: {
+            isArchived: false,
+            property: { matricule: Number(agreementProperty) },
+          },
+        }),
       ...((apartmentId || tenantId || searchTerm || agreementStatus) && {
         OR: [
           searchTerm &&

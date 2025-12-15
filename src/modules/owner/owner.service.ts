@@ -71,11 +71,11 @@ export class OwnerService {
             select: {
               id: true,
               apartments: {
-                select: {
-                  id: true,
-                },
                 where: {
                   isArchived: false,
+                },
+                select: {
+                  id: true,
                 },
               },
             },

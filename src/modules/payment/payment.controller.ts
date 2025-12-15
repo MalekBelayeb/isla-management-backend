@@ -77,11 +77,15 @@ export class PaymentController {
     @Query('propertyId') propertyId?: string,
     @Query('agreementId') agreementId?: string,
     @Query('apartmentId') apartmentId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('type') type?: PaymentType,
   ) {
     return this.paymentService.findFinancialBalance(
       ownerId,
       propertyId,
+      startDate,
+      endDate,
       agreementId,
       apartmentId,
       type,

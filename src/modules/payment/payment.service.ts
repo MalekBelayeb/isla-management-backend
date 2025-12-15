@@ -207,13 +207,31 @@ export class PaymentService {
   async findFinancialBalance(
     ownerId?: string,
     propertyId?: string,
+    startDate?: string,
+    endDate?: string,
     agreementId?: string,
     apartmentId?: string,
     type?: PaymentType,
   ) {
+    let createdAtCriteria;
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      end.setHours(23, 59, 59, 999);
+      createdAtCriteria = startDate &&
+        endDate && {
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        };
+    }
     const payments = await this.prisma.payment.findMany({
       where: {
         isArchived: false,
+        ...(createdAtCriteria && createdAtCriteria),
         ...(type && { type }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && { agreement: { apartment: { propertyId } } }),
@@ -267,6 +285,7 @@ export class PaymentService {
       _sum: { amount: true },
       where: {
         isArchived: false,
+        ...(createdAtCriteria && createdAtCriteria),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && { agreement: { apartment: { propertyId } } }),
         ...(agreementId && { agreementId }),
