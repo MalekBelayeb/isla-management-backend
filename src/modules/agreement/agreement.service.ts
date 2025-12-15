@@ -27,7 +27,8 @@ export class AgreementService {
         },
       },
     });
-    if (tenantWithActiveAgreement) {
+
+    if (tenantWithActiveAgreement?.agreements?.length) {
       throw new HttpException(
         consts.message.tenantAlreadyHasAgreement,
         HttpStatus.BAD_REQUEST,
@@ -52,7 +53,7 @@ export class AgreementService {
       },
     });
 
-    if (apartmentWithActiveAgreement) {
+    if (apartmentWithActiveAgreement?.agreements?.length) {
       throw new HttpException(
         consts.message.apartmentAlreadyHasAgreement,
         HttpStatus.BAD_REQUEST,
@@ -101,6 +102,7 @@ export class AgreementService {
     tenantId,
     startDate,
     endDate,
+    agreementProperty,
     agreementStatus,
     limit,
     page,
@@ -124,10 +126,16 @@ export class AgreementService {
       isArchived: false,
 
       ...(createdAtCriteria && createdAtCriteria),
-
+      ...((agreementProperty && !isNaN(+agreementProperty)) && {
+        apartment: {
+          isArchived: false,
+          property: { matricule: Number(agreementProperty) },
+        },
+      }),
       ...((apartmentId || tenantId || searchTerm || agreementStatus) && {
         OR: [
-          searchTerm && { matricule: searchTerm },
+          searchTerm &&
+            !isNaN(+searchTerm) && { matricule: Number(searchTerm) },
           apartmentId && { apartmentId },
           tenantId && { tenantId },
           agreementStatus &&

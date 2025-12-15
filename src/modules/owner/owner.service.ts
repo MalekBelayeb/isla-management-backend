@@ -69,7 +69,15 @@ export class OwnerService {
               isArchived: false,
             },
             select: {
-              _count: true,
+              id: true,
+              apartments: {
+                select: {
+                  id: true,
+                },
+                where: {
+                  isArchived: false,
+                },
+              },
             },
           },
         },

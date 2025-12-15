@@ -37,9 +37,14 @@ export class ApartmentService {
   }: ApartmentFindAllArgs) {
     const whereCriteria = {
       isArchived: false,
-      ...(searchTerm && {
-        OR: [{ address: { contains: searchTerm, mode: 'insensitive' } }],
-      }),
+      ...(searchTerm &&
+        isNaN(+searchTerm) && {
+          OR: [{ address: { contains: searchTerm, mode: 'insensitive' } }],
+        }),
+      ...(searchTerm &&
+        !isNaN(+searchTerm) && {
+          OR: [{ matricule: Number(searchTerm) }],
+        }),
       ...(type && {
         type,
       }),

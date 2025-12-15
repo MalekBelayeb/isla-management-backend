@@ -35,6 +35,8 @@ export class PaymentService {
     apartmentId,
     tenantId,
     startDate,
+    paymentAgreement,
+    paymentProperty,
     endDate,
     paymentMethod,
     limit,
@@ -67,8 +69,24 @@ export class PaymentService {
           paymentMethod && { method: paymentMethod },
         ].filter(Boolean),
       }),
+      ...(paymentAgreement &&
+        !isNaN(+paymentAgreement) && {
+          agreement: { matricule: Number(paymentAgreement) },
+        }),
+      ...(paymentProperty &&
+        !isNaN(+paymentProperty) && {
+          agreement: {
+            apartment: {
+              isArchived: false,
+              property: {
+                isArchived: false,
+                matricule: Number(paymentProperty),
+              },
+            },
+          },
+        }),
     } as Prisma.PaymentWhereInput;
-    console.log(whereCriteria);
+    console.log(JSON.stringify(whereCriteria));
     const [payments, total] = await this.prisma.$transaction([
       this.prisma.payment.findMany({
         where: whereCriteria,

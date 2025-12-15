@@ -33,6 +33,8 @@ export class TenantService {
     searchTerm,
     agreementId,
     apartmentId,
+    tenantAgreement,
+    tenantProperty,
     statusTenant,
     limit,
     page,
@@ -56,7 +58,7 @@ export class TenantService {
         !isNaN(+searchTerm) && {
           OR: [
             { matricule: +searchTerm },
-            { phoneNumber: { contains: searchTerm, mode: 'insensitive'} },
+            { phoneNumber: { contains: searchTerm, mode: 'insensitive' } },
             { cin: { contains: searchTerm, mode: 'insensitive' } },
           ],
         }),
@@ -67,6 +69,27 @@ export class TenantService {
             { email: { contains: searchTerm, mode: 'insensitive' } },
             { address: { contains: searchTerm, mode: 'insensitive' } },
           ],
+        }),
+      ...(tenantAgreement &&
+        !isNaN(+tenantAgreement) && {
+          agreements: {
+            some: { isArchived: false, matricule: Number(tenantAgreement) },
+          },
+        }),
+      ...(tenantProperty &&
+        !isNaN(+tenantProperty) && {
+          agreements: {
+            some: {
+              isArchived: false,
+              apartment: {
+                isArchived: false,
+                property: {
+                  isArchived: false,
+                  matricule: Number(tenantProperty),
+                },
+              },
+            },
+          },
         }),
       ...(agreementId && {
         agreements: { some: { id: agreementId } },

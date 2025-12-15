@@ -4,6 +4,8 @@ export type PaymentFindAllArgs = {
   tenantId?: string;
   startDate?: string;
   endDate?: string;
+  paymentProperty?: string;
+  paymentAgreement?: string;
   paymentMethod?: string;
   limit?: number;
   page?: number;
