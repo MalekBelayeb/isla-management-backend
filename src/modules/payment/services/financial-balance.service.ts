@@ -31,16 +31,14 @@ export class FinancialBalanceService {
           },
         };
     }
+
+    const types = type?.split(',');
+
     const payments = await this.prisma.payment.findMany({
       where: {
         isArchived: false,
         ...(createdAtCriteria && createdAtCriteria),
-        type: { notIn: ['expense_agency'] },
-        ...(type && type != 'expense' && { type }),
-        ...(type &&
-          type === 'expense' && {
-            type: { in: ['expense', 'expense_agency'] },
-          }),
+        ...(types && { type: { in: types } }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && {
           OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
@@ -99,12 +97,14 @@ export class FinancialBalanceService {
         createdAt: 'desc',
       },
     });
+
     const groupedSums = await this.prisma.payment.groupBy({
       by: ['type'],
       _sum: { amount: true },
       where: {
         isArchived: false,
         ...(createdAtCriteria && createdAtCriteria),
+        ...(types && { type: { in: types } }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && {
           OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
@@ -137,11 +137,17 @@ export class FinancialBalanceService {
         property.profitInPercentage,
       );
     }
+    const totalAgencyExpense =
+      groupedSums
+        .find((item) => item.type === 'expense_agency')
+        ?._sum.amount?.toNumber() ?? 0;
 
     const totalExpense =
       (groupedSums
         .find((item) => item.type === 'expense')
-        ?._sum.amount?.toNumber() ?? 0) + (profit?.profitWithTax ?? 0);
+        ?._sum.amount?.toNumber() ?? 0) +
+      (profit?.profitWithTax ?? 0) +
+      (totalAgencyExpense ?? 0);
 
     const netBalance: number = totalIncome - totalExpense;
 

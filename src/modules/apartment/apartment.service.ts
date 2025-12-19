@@ -112,6 +112,8 @@ export class ApartmentService {
                   matricule: true,
                   gender: true,
                   fullname: true,
+                  type: true,
+                  society: true,
                 },
               },
             },

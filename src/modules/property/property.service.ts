@@ -30,7 +30,7 @@ export class PropertyService {
     const whereCriteria = {
       isArchived: false,
       ...(searchTerm && {
-        OR: [{ address: { contains: searchTerm } }],
+        OR: [{ address: { contains: searchTerm, mode: 'insensitive' } }],
       }),
       ...(ownerId && {
         ownerId,
