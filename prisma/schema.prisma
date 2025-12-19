@@ -202,7 +202,7 @@ model Payment {
   id            String            @id @default(uuid())
   amount        Decimal
   paymentDate   DateTime          @default(now())
-  category      PaymentCategory   @default(rent)
+  category      PaymentCategory   @default(others)
   type          PaymentType
   method        PaymentMethodType
   label         String            @default("")
