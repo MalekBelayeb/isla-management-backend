@@ -14,7 +14,7 @@ export class ApartmentMapper {
       const agreement =
         item.agreements.length > 0 ? item.agreements[0] : undefined;
 
-      if (agreement && new Date(agreement?.expireDate) > todayDate) {
+      if (agreement && agreement.status === 'ACTIVE') {
         rentStatus = 'rented';
       } else {
         rentStatus = 'notRented';

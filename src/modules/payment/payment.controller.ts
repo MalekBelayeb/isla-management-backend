@@ -12,7 +12,7 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
 } from '@nestjs/common';
-import { PaymentService } from './payment.service';
+import { PaymentService } from './services/payment.service';
 import {
   CreatePaymentDtoApiBody,
   type CreatePaymentDtoType,
@@ -28,10 +28,14 @@ import {
 } from './dto/update-payment.dto';
 import { defaultLimitValue } from 'src/shared/contants/constants';
 import { PaymentType } from 'generated/prisma';
+import { FinancialBalanceService } from './services/financial-balance.service';
 
 @Controller('api/payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly financialBalanceService: FinancialBalanceService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -81,7 +85,7 @@ export class PaymentController {
     @Query('endDate') endDate?: string,
     @Query('type') type?: PaymentType,
   ) {
-    return this.paymentService.findFinancialBalance(
+    return this.financialBalanceService.findFinancialBalance({
       ownerId,
       propertyId,
       startDate,
@@ -89,7 +93,7 @@ export class PaymentController {
       agreementId,
       apartmentId,
       type,
-    );
+    });
   }
 
   @Get(':id')

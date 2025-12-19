@@ -5,6 +5,7 @@ import { z } from 'zod';
 export const createPropertyDtoSchema = z.object({
   address: z.string(),
   type: z.enum(PropertyType),
+  profitInPercentage: z.number(),
   ownerId: z.string(),
 });
 

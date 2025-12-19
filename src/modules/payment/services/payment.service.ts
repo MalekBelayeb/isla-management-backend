@@ -1,15 +1,61 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePaymentDtoType } from './dto/create-payment.dto';
-import { UpdatePaymentDtoType } from './dto/update-payment.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CreatePaymentDtoType } from '../dto/create-payment.dto';
+import { UpdatePaymentDtoType } from '../dto/update-payment.dto';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
 import { PaymentType, Prisma } from 'generated/prisma';
-import { PaymentFindAllArgs } from './types/payment.findAll.type';
+import { PaymentFindAllArgs } from '../types/payment.findAll.type';
+import { consts } from 'src/shared/contants/constants';
+import { Decimal } from 'generated/prisma/runtime/library';
 
 @Injectable()
 export class PaymentService {
   constructor(private prisma: PrismaService) {}
-
+  async checkAgreementValidity(agreementId: string) {
+    const agreement = await this.prisma.agreement.findFirst({
+      where: {
+        isArchived: false,
+        id: agreementId,
+      },
+    });
+    if (!agreement) {
+      throw new HttpException(
+        consts.message.agreementNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (agreement.status === 'SUSPENDED') {
+      throw new HttpException(
+        consts.message.agreementSuspended,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
   async create(createPaymentDto: CreatePaymentDtoType) {
+    let propertyId = '';
+    if (
+      createPaymentDto.type === 'expense' &&
+      createPaymentDto.matriculeProperty &&
+      !isNaN(+createPaymentDto.matriculeProperty)
+    ) {
+      const property = await this.prisma.property.findFirst({
+        where: {
+          isArchived: false,
+          matricule: Number(createPaymentDto.matriculeProperty),
+        },
+      });
+      if (!property) {
+        throw new HttpException(
+          consts.message.propertyNotFound,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      propertyId = property.id;
+    }
+
+    if (createPaymentDto.type === 'income') {
+      await this.checkAgreementValidity(createPaymentDto.agreementId ?? '');
+    }
+
     await this.prisma.payment.create({
       data: {
         amount: createPaymentDto.amount,
@@ -17,15 +63,16 @@ export class PaymentService {
         paymentDate: createPaymentDto.paymentDate,
         type: createPaymentDto.type,
         category: createPaymentDto.category,
-        agreementId: createPaymentDto.agreementId,
+        ...(createPaymentDto.agreementId && {
+          agreementId: createPaymentDto.agreementId,
+        }),
+        ...(propertyId && {
+          propertyId,
+        }),
         notes: createPaymentDto.notes,
         label: createPaymentDto.label,
-        ...(createPaymentDto.rentStartDate && {
-          rentStartDate: new Date(createPaymentDto.rentStartDate),
-        }),
-        ...(createPaymentDto.rentEndDate && {
-          rentEndDate: new Date(createPaymentDto.rentEndDate),
-        }),
+        rentStartDate: createPaymentDto.rentStartDate,
+        rentEndDate: createPaymentDto.rentEndDate,
       },
     });
   }
@@ -61,12 +108,13 @@ export class PaymentService {
     const whereCriteria = {
       isArchived: false,
       ...(createdAtCriteria && createdAtCriteria),
+      type: { not: 'expense_agency' },
       ...((apartmentId || tenantId || agreementId || paymentMethod) && {
         OR: [
-          apartmentId && { agreement: { apartmentId } },
-          tenantId && { agreement: { tenantId } },
-          agreementId && { agreementId },
-          paymentMethod && { method: paymentMethod },
+          apartmentId && { agreement: { apartmentId, isArchived: false } },
+          tenantId && { agreement: { tenantId, isArchived: false } },
+          agreementId && { agreementId, isArchived: false },
+          paymentMethod && { method: paymentMethod, isArchived: false },
         ].filter(Boolean),
       }),
       ...(paymentAgreement &&
@@ -86,7 +134,7 @@ export class PaymentService {
           },
         }),
     } as Prisma.PaymentWhereInput;
-    console.log(JSON.stringify(whereCriteria));
+
     const [payments, total] = await this.prisma.$transaction([
       this.prisma.payment.findMany({
         where: whereCriteria,
@@ -98,6 +146,20 @@ export class PaymentService {
           method: true,
           createdAt: true,
           tenantId: true,
+          paymentDate: true,
+          property: {
+            select: {
+              id: true,
+              matricule: true,
+              address: true,
+              owner: {
+                select: {
+                  gender: true,
+                  fullname: true,
+                },
+              },
+            },
+          },
           apartmentId: true,
           agreementId: true,
           label: true,
@@ -115,7 +177,15 @@ export class PaymentService {
                   type: true,
                   property: {
                     select: {
+                      id: true,
                       matricule: true,
+                      address: true,
+                      owner: {
+                        select: {
+                          gender: true,
+                          fullname: true,
+                        },
+                      },
                     },
                   },
                 },
@@ -155,9 +225,24 @@ export class PaymentService {
         method: true,
         category: true,
         label: true,
+        propertyId: true,
         rentStartDate: true,
+        paymentDate: true,
         rentEndDate: true,
         createdAt: true,
+        property: {
+          select: {
+            id: true,
+            matricule: true,
+            address: true,
+            owner: {
+              select: {
+                gender: true,
+                fullname: true,
+              },
+            },
+          },
+        },
         agreement: {
           select: {
             id: true,
@@ -168,6 +253,19 @@ export class PaymentService {
                 matricule: true,
                 address: true,
                 type: true,
+                property: {
+                  select: {
+                    id: true,
+                    matricule: true,
+                    address: true,
+                    owner: {
+                      select: {
+                        gender: true,
+                        fullname: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             tenant: {
@@ -185,6 +283,31 @@ export class PaymentService {
   }
 
   async update(id: string, updatePaymentDto: UpdatePaymentDtoType) {
+    let propertyId = '';
+    if (
+      updatePaymentDto.type === 'expense' &&
+      updatePaymentDto.matriculeProperty &&
+      !isNaN(+updatePaymentDto.matriculeProperty)
+    ) {
+      const property = await this.prisma.property.findFirst({
+        where: {
+          isArchived: false,
+          matricule: Number(updatePaymentDto.matriculeProperty),
+        },
+      });
+      if (!property) {
+        throw new HttpException(
+          consts.message.propertyNotFound,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      propertyId = property.id;
+    }
+
+    if (updatePaymentDto.type === 'income') {
+      await this.checkAgreementValidity(updatePaymentDto.agreementId ?? '');
+    }
+
     await this.prisma.payment.update({
       where: {
         id,
@@ -196,112 +319,19 @@ export class PaymentService {
         type: updatePaymentDto.type,
         label: updatePaymentDto.label,
         category: updatePaymentDto.category,
-        agreementId: updatePaymentDto.agreementId,
+        ...(propertyId &&
+          updatePaymentDto.type === 'expense' && {
+            propertyId,
+          }),
+        ...(updatePaymentDto.agreementId &&
+          updatePaymentDto.type === 'income' && {
+            agreementId: updatePaymentDto.agreementId,
+          }),
         notes: updatePaymentDto.notes,
         rentStartDate: updatePaymentDto.rentStartDate,
         rentEndDate: updatePaymentDto.rentEndDate,
       },
     });
-  }
-
-  async findFinancialBalance(
-    ownerId?: string,
-    propertyId?: string,
-    startDate?: string,
-    endDate?: string,
-    agreementId?: string,
-    apartmentId?: string,
-    type?: PaymentType,
-  ) {
-    let createdAtCriteria;
-
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      end.setHours(23, 59, 59, 999);
-      createdAtCriteria = startDate &&
-        endDate && {
-          createdAt: {
-            gte: start,
-            lte: end,
-          },
-        };
-    }
-    const payments = await this.prisma.payment.findMany({
-      where: {
-        isArchived: false,
-        ...(createdAtCriteria && createdAtCriteria),
-        ...(type && { type }),
-        ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
-        ...(propertyId && { agreement: { apartment: { propertyId } } }),
-        ...(agreementId && { agreementId }),
-        ...(apartmentId && { agreement: { apartmentId } }),
-      },
-      select: {
-        id: true,
-        amount: true,
-        type: true,
-        label: true,
-        category: true,
-        method: true,
-        createdAt: true,
-        tenantId: true,
-        apartmentId: true,
-        agreementId: true,
-        agreement: {
-          select: {
-            id: true,
-            matricule: true,
-            paymentFrequency: true,
-            apartment: {
-              select: {
-                matricule: true,
-                address: true,
-                type: true,
-                property: {
-                  select: {
-                    matricule: true,
-                  },
-                },
-              },
-            },
-            tenant: {
-              select: {
-                id: true,
-                fullname: true,
-                gender: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-    const groupedSums = await this.prisma.payment.groupBy({
-      by: ['type'],
-      _sum: { amount: true },
-      where: {
-        isArchived: false,
-        ...(createdAtCriteria && createdAtCriteria),
-        ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
-        ...(propertyId && { agreement: { apartment: { propertyId } } }),
-        ...(agreementId && { agreementId }),
-        ...(apartmentId && { agreement: { apartmentId } }),
-      },
-    });
-    const totalIncome =
-      groupedSums
-        .find((item) => item.type === 'income')
-        ?._sum.amount?.toNumber() ?? 0;
-    const totalExpense =
-      groupedSums
-        .find((item) => item.type === 'expense')
-        ?._sum.amount?.toNumber() ?? 0;
-    const netBalance: number = totalIncome - totalExpense;
-    return { netBalance, totalIncome, totalExpense, payments };
   }
 
   async remove(id: string) {

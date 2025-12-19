@@ -17,7 +17,6 @@ export class AgreementService {
         agreements: {
           where: {
             isArchived: false,
-            expireDate: { gt: new Date() },
             status: 'ACTIVE',
           },
           orderBy: {
@@ -42,7 +41,6 @@ export class AgreementService {
         agreements: {
           where: {
             isArchived: false,
-            expireDate: { gt: new Date() },
             status: 'ACTIVE',
           },
           orderBy: {
@@ -62,13 +60,6 @@ export class AgreementService {
   }
 
   async create(createAgreementDto: CreateAgreementDtoType) {
-    if (createAgreementDto.startDate > createAgreementDto.expireDate) {
-      throw new HttpException(
-        consts.message.badDateRange,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     //check tenant or apartment hasnt active agreement already
     await this.verifyTenantAgreementUniquenessCriteria(
       createAgreementDto.tenantId,
@@ -82,7 +73,6 @@ export class AgreementService {
         //matricule: createAgreementDto.matricule,
         rentAmount: createAgreementDto.rentAmount,
         startDate: createAgreementDto.startDate,
-        expireDate: createAgreementDto.expireDate,
         notes: createAgreementDto.notes,
         nbDaysOfTolerance: createAgreementDto.nbDaysOfTolerance,
         apartmentId: createAgreementDto.apartmentId,
@@ -141,27 +131,15 @@ export class AgreementService {
           tenantId && { tenantId },
           agreementStatus &&
             agreementStatus === 'active' && {
-              expireDate: {
-                gte: new Date(),
-              },
-              startDate: {
-                lte: new Date(),
-              },
-            },
-          agreementStatus &&
-            agreementStatus === 'expired' && {
-              expireDate: {
-                lte: new Date(),
-              },
+              status: 'ACTIVE',
             },
           agreementStatus &&
             agreementStatus === 'suspended' && {
-              status: 'TERMINATED',
+              status: 'SUSPENDED',
             },
         ].filter(Boolean),
       }),
     } as Prisma.AgreementWhereInput;
-    console.log(JSON.stringify(whereCriteria));
 
     const [agreements, total] = await this.prisma.$transaction([
       this.prisma.agreement.findMany({
@@ -170,7 +148,6 @@ export class AgreementService {
           id: true,
           rentAmount: true,
           startDate: true,
-          expireDate: true,
           status: true,
           nbDaysOfTolerance: true,
           paymentFrequency: true,
@@ -183,6 +160,18 @@ export class AgreementService {
               matricule: true,
               address: true,
               type: true,
+              property: {
+                select: {
+                  address: true,
+                  matricule: true,
+                  owner: {
+                    select: {
+                      fullname: true,
+                      gender: true,
+                    },
+                  },
+                },
+              },
             },
           },
           tenant: {
@@ -212,7 +201,6 @@ export class AgreementService {
         id: true,
         rentAmount: true,
         startDate: true,
-        expireDate: true,
         status: true,
         paymentFrequency: true,
         nbDaysOfTolerance: true,
@@ -225,6 +213,18 @@ export class AgreementService {
             matricule: true,
             address: true,
             type: true,
+            property: {
+              select: {
+                address: true,
+                matricule: true,
+                owner: {
+                  select: {
+                    fullname: true,
+                    gender: true,
+                  },
+                },
+              },
+            },
           },
         },
         tenant: {
@@ -241,12 +241,6 @@ export class AgreementService {
   }
 
   async update(id: string, updateAgreementDto: UpdateAgreementDtoType) {
-    if (updateAgreementDto.startDate > updateAgreementDto.expireDate) {
-      throw new HttpException(
-        consts.message.badDateRange,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     const agreement = await this.prisma.agreement.findFirst({
       where: { id, isArchived: false },
       select: {
@@ -280,7 +274,6 @@ export class AgreementService {
         terminatedAt: updateAgreementDto.terminatedAt,
         terminationReason: updateAgreementDto.terminationReason,
         startDate: updateAgreementDto.startDate,
-        expireDate: updateAgreementDto.expireDate,
         nbDaysOfTolerance: updateAgreementDto.nbDaysOfTolerance,
         notes: updateAgreementDto.notes,
         apartmentId: updateAgreementDto.apartmentId,

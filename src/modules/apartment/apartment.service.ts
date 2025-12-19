@@ -68,9 +68,6 @@ export class ApartmentService {
             some: {
               status: 'ACTIVE',
               isArchived: false,
-              expireDate: {
-                gte: new Date(),
-              },
             },
           },
         }),
@@ -80,9 +77,6 @@ export class ApartmentService {
             none: {
               status: 'ACTIVE',
               isArchived: false,
-              expireDate: {
-                gte: new Date(),
-              },
             },
           },
         }),

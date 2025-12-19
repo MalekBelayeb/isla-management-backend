@@ -7,7 +7,6 @@ export const updateAgreementSchema = z.object({
   nbDaysOfTolerance: z.number().optional(),
   paymentFrequency: z.enum(PaymentFrequency),
   startDate: z.coerce.date(),
-  expireDate: z.coerce.date(),
   apartmentId: z.string(),
   tenantId: z.string(),
   status: z.enum(AgreementStatus).optional(),
@@ -39,8 +38,6 @@ export class UpdateAgreementDtoApiBody {
   paymentFrequency: string;
   @ApiProperty({ example: new Date() })
   startDate: Date;
-  @ApiProperty({ example: new Date() })
-  expireDate: Date;
   @ApiProperty({ example: 'ACTIVE' })
   status: string;
   @ApiProperty({ example: '' })

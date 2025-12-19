@@ -14,6 +14,7 @@ export class PropertyService {
         address: createPropertyDto.address,
         type: createPropertyDto.type,
         ownerId: createPropertyDto.ownerId,
+        profitInPercentage: createPropertyDto.profitInPercentage,
       },
     });
   }
@@ -59,6 +60,7 @@ export class PropertyService {
             where: { isArchived: false },
           },
           address: true,
+          profitInPercentage: true,
           createdAt: true,
           type: true,
           owner: true,
@@ -86,6 +88,7 @@ export class PropertyService {
         owner: true,
         matricule: true,
         apartments: true,
+        profitInPercentage: true,
       },
     });
     return property;
@@ -98,6 +101,7 @@ export class PropertyService {
         address: updatePropertyDto.address,
         ownerId: updatePropertyDto.ownerId,
         type: updatePropertyDto.type,
+        profitInPercentage: updatePropertyDto.profitInPercentage,
       },
     });
   }

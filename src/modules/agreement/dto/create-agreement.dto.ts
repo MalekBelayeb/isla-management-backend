@@ -6,7 +6,6 @@ export const createAgreementSchema = z.object({
   rentAmount: z.number(),
   nbDaysOfTolerance: z.number().optional(),
   startDate: z.coerce.date(),
-  expireDate: z.coerce.date(),
   firstDayOfPayment: z.coerce.date().optional(),
   paymentFrequency: z.enum(PaymentFrequency),
   deposit: z.number().optional(),
@@ -35,8 +34,6 @@ export class CreateAgreementDtoApiBody {
   paymentFrequency: string;
   @ApiProperty({ example: new Date() })
   startDate: Date;
-  @ApiProperty({ example: new Date() })
-  expireDate: Date;
   @ApiProperty({ example: 'ACTIVE' })
   status: string;
   @ApiProperty({ example: '' })

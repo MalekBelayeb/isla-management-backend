@@ -104,9 +104,6 @@ export class TenantService {
               status: 'ACTIVE',
               isArchived: false,
               paymentFrequency: 'MONTHLY',
-              expireDate: {
-                gte: new Date(),
-              },
               payments: {
                 none: {
                   isArchived: false,
@@ -148,17 +145,17 @@ export class TenantService {
               id: true,
               matricule: true,
               startDate: true,
-              expireDate: true,
               status: true,
               nbDaysOfTolerance: true,
               createdAt: true,
               payments: {
                 where: {
                   type: 'income',
+                  category: 'rent',
                   isArchived: false,
                 },
                 orderBy: {
-                  createdAt: 'desc',
+                  paymentDate: 'desc',
                 },
                 take: 1,
               },
@@ -192,6 +189,7 @@ export class TenantService {
       where: { id, isArchived: false },
       include: {
         agreements: {
+          where: { isArchived: false },
           orderBy: {
             createdAt: 'desc',
           },

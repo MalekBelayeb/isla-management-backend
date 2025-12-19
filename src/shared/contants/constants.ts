@@ -1,4 +1,5 @@
 export const defaultLimitValue = 50;
+export const taxInPercentage = 19;
 
 export const consts = {
   message: {
@@ -9,6 +10,9 @@ export const consts = {
       'Validation failed: the start date must be earlier than the end date',
     tenantAlreadyHasAgreement:
       'Validation failed: The tenant already has an active agreement',
+    propertyNotFound: 'Validation failed: Property not found',
+    agreementNotFound: 'Validation failed: Agreement not found',
+    agreementSuspended: 'Validation failed: Agreement suspended',
     apartmentAlreadyHasAgreement:
       'Validation failed: The apartment already has an active agreement',
   },

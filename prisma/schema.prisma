@@ -67,6 +67,7 @@ enum PaymentMethodType {
 enum PaymentType {
   income
   expense
+  expense_agency
 }
 
 enum PaymentCategory {
@@ -78,6 +79,7 @@ enum PaymentCategory {
   cleaning_fees // Frais de nettoyage
   furniture_rental_fees // Location de mobilier
   home_insurance_payment // Assurance habitation
+  others
 }
 
 enum PaymentFrequency {
@@ -88,10 +90,8 @@ enum PaymentFrequency {
 }
 
 enum AgreementStatus {
-  PENDING
   ACTIVE
-  TERMINATED
-  EXPIRED
+  SUSPENDED
 }
 
 model User {
@@ -126,15 +126,17 @@ model Owner {
 }
 
 model Property {
-  id         String       @id @default(uuid())
-  matricule  Int          @default(autoincrement())
-  address    String
-  type       PropertyType
-  ownerId    String
-  owner      Owner        @relation(fields: [ownerId], references: [id])
-  createdAt  DateTime     @default(now())
-  isArchived Boolean      @default(false)
-  apartments Apartment[]
+  id                 String       @id @default(uuid())
+  matricule          Int          @default(autoincrement())
+  address            String
+  type               PropertyType
+  ownerId            String
+  profitInPercentage Float        @default(10)
+  owner              Owner        @relation(fields: [ownerId], references: [id])
+  createdAt          DateTime     @default(now())
+  isArchived         Boolean      @default(false)
+  apartments         Apartment[]
+  Payment            Payment[]
 }
 
 model Apartment {
@@ -174,14 +176,13 @@ model Tenant {
 
 model Agreement {
   id                String           @id @default(uuid())
-  matricule         Int           @default(autoincrement())
+  matricule         Int              @default(autoincrement())
   rentAmount        Decimal
   nbDaysOfTolerance Int              @default(10)
   deposit           Decimal? // optional amount paid as deposit (caution).
   firstDayOfPayment DateTime?
   paymentFrequency  PaymentFrequency @default(MONTHLY)
   startDate         DateTime
-  expireDate        DateTime
   signedAt          DateTime?        @default(now())
   terminatedAt      DateTime?
   terminationReason String?
@@ -201,19 +202,22 @@ model Payment {
   id            String            @id @default(uuid())
   amount        Decimal
   paymentDate   DateTime          @default(now())
-  category      PaymentCategory
+  category      PaymentCategory   @default(others)
   type          PaymentType
   method        PaymentMethodType
   label         String            @default("")
-  rentStartDate DateTime          @default(now())
-  rentEndDate   DateTime          @default(now())
+  rentStartDate DateTime?         @default(now())
+  rentEndDate   DateTime?         @default(now())
   notes         String            @default("")
   createdAt     DateTime          @default(now())
   isArchived    Boolean           @default(false)
-  agreement     Agreement         @relation(fields: [agreementId], references: [id])
-  agreementId   String
-  Apartment     Apartment?        @relation(fields: [apartmentId], references: [id])
-  apartmentId   String?
-  Tenant        Tenant?           @relation(fields: [tenantId], references: [id])
-  tenantId      String?
+  property      Property?         @relation(fields: [propertyId], references: [id]) // business rule => case expense  
+  propertyId    String?
+
+  agreement   Agreement? @relation(fields: [agreementId], references: [id])
+  agreementId String?
+  Apartment   Apartment? @relation(fields: [apartmentId], references: [id])
+  apartmentId String?
+  Tenant      Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId    String?
 }
