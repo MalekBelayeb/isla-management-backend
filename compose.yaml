@@ -11,6 +11,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    command: pnpm start:prod
   postgres:
     image: postgres:18-alpine
     restart: always
