@@ -1,7 +1,7 @@
 services:
   server:
-    image: malekbelayeb/isla-management:latest
-    container_name: isla-management
+    build:
+      context: .
     environment:
       NODE_ENV: production
     ports:
