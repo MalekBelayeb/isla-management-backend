@@ -103,6 +103,10 @@ model User {
   role       Role     @default(agent)
   createdAt  DateTime @default(now())
   isArchived Boolean  @default(false)
+
+  @@index([role])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 model Owner {
@@ -123,6 +127,11 @@ model Owner {
   createdAt   DateTime        @default(now())
   isArchived  Boolean         @default(false)
   properties  Property[]
+
+  @@index([email])
+  @@index([cin])
+  @@index([matricule])
+  @@index([isArchived])
 }
 
 model Property {
@@ -137,6 +146,12 @@ model Property {
   isArchived         Boolean      @default(false)
   apartments         Apartment[]
   Payment            Payment[]
+
+  @@index([ownerId])
+  @@index([type])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 model Apartment {
@@ -153,6 +168,12 @@ model Apartment {
   property    Property      @relation(fields: [propertyId], references: [id])
   agreements  Agreement[]
   Payment     Payment[]
+
+  @@index([propertyId])
+  @@index([type])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 model Tenant {
@@ -172,6 +193,12 @@ model Tenant {
   isArchived  Boolean     @default(false)
   agreements  Agreement[]
   Payment     Payment[]
+
+  @@index([email])
+  @@index([cin])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 model Agreement {
@@ -179,7 +206,7 @@ model Agreement {
   matricule         Int              @default(autoincrement())
   rentAmount        Decimal
   nbDaysOfTolerance Int              @default(10)
-  deposit           Decimal? // optional amount paid as deposit (caution).
+  deposit           Decimal?
   firstDayOfPayment DateTime?
   paymentFrequency  PaymentFrequency @default(MONTHLY)
   startDate         DateTime
@@ -196,6 +223,12 @@ model Agreement {
   tenantId          String
   tenant            Tenant           @relation(fields: [tenantId], references: [id])
   payments          Payment[]
+
+  @@index([apartmentId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 model Payment {
@@ -211,7 +244,7 @@ model Payment {
   notes         String            @default("")
   createdAt     DateTime          @default(now())
   isArchived    Boolean           @default(false)
-  property      Property?         @relation(fields: [propertyId], references: [id]) // business rule => case expense  
+  property      Property?         @relation(fields: [propertyId], references: [id])
   propertyId    String?
 
   agreement   Agreement? @relation(fields: [agreementId], references: [id])
@@ -220,4 +253,14 @@ model Payment {
   apartmentId String?
   Tenant      Tenant?    @relation(fields: [tenantId], references: [id])
   tenantId    String?
+
+  @@index([propertyId])
+  @@index([apartmentId])
+  @@index([tenantId])
+  @@index([agreementId])
+  @@index([paymentDate])
+  @@index([category])
+  @@index([type])
+  @@index([isArchived])
+  @@index([createdAt])
 }
