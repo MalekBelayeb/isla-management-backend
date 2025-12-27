@@ -121,6 +121,7 @@ model Owner {
   nationality NationalityType @default(tn)
   phoneNumber String
   rib         String
+  bank        String          @default("")
   society     String?
   taxId       String?
   type        OwnerType       @default(natural)
@@ -246,6 +247,11 @@ model Payment {
   isArchived    Boolean           @default(false)
   property      Property?         @relation(fields: [propertyId], references: [id])
   propertyId    String?
+
+  tva            Decimal? @default(19)
+  bank           String?
+  checkNumber    String?
+  transferNumber String?
 
   agreement   Agreement? @relation(fields: [agreementId], references: [id])
   agreementId String?

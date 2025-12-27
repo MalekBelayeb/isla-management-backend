@@ -24,6 +24,7 @@ export class OwnerService {
           type: createOwnerDto.type,
           taxId: createOwnerDto.taxId,
           society: createOwnerDto.society,
+          bank: createOwnerDto.bank,
         },
       });
       return newOwner;
@@ -62,6 +63,7 @@ export class OwnerService {
           phoneNumber: true,
           type: true,
           taxId: true,
+          bank: true,
           society: true,
           nationality: true,
           properties: {
@@ -112,6 +114,7 @@ export class OwnerService {
         gender: updateOwnerDto.gender,
         phoneNumber: updateOwnerDto.phoneNumber,
         rib: updateOwnerDto.rib,
+        bank: updateOwnerDto.bank,
         type: updateOwnerDto.type,
         taxId: updateOwnerDto.taxId,
         society: updateOwnerDto.society,

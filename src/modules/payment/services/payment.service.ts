@@ -52,16 +52,22 @@ export class PaymentService {
       propertyId = property.id;
     }
 
-    if (createPaymentDto.type === 'income') {
+    if (
+      createPaymentDto.type === 'income' &&
+      createPaymentDto.category === 'rent'
+    ) {
       await this.checkAgreementValidity(createPaymentDto.agreementId ?? '');
     }
 
-    await this.prisma.payment.create({
+    const newPayment = await this.prisma.payment.create({
       data: {
         amount: createPaymentDto.amount,
         method: createPaymentDto.method,
         paymentDate: createPaymentDto.paymentDate,
         type: createPaymentDto.type,
+        bank: createPaymentDto.bank,
+        checkNumber: createPaymentDto.checkNumber,
+        transferNumber: createPaymentDto.transferNumber,
         category: createPaymentDto.category,
         ...(createPaymentDto.agreementId && {
           agreementId: createPaymentDto.agreementId,
@@ -69,19 +75,25 @@ export class PaymentService {
         ...(propertyId && {
           propertyId,
         }),
+        ...(createPaymentDto.tva && {
+          tva: createPaymentDto.tva,
+        }),
         notes: createPaymentDto.notes,
         label: createPaymentDto.label,
         rentStartDate: createPaymentDto.rentStartDate,
         rentEndDate: createPaymentDto.rentEndDate,
       },
     });
+    return { id: newPayment.id };
   }
 
   async findAll({
     agreementId,
     apartmentId,
+    ownerId,
     tenantId,
     startDate,
+    paymentType,
     paymentAgreement,
     paymentProperty,
     endDate,
@@ -98,7 +110,7 @@ export class PaymentService {
       end.setHours(23, 59, 59, 999);
       createdAtCriteria = startDate &&
         endDate && {
-          createdAt: {
+          paymentDate: {
             gte: start,
             lte: end,
           },
@@ -109,12 +121,20 @@ export class PaymentService {
       isArchived: false,
       ...(createdAtCriteria && createdAtCriteria),
       type: { not: 'expense_agency' },
-      ...((apartmentId || tenantId || agreementId || paymentMethod) && {
+      ...((apartmentId ||
+        tenantId ||
+        agreementId ||
+        paymentMethod ||
+        paymentType) && {
         OR: [
+          ownerId && {
+            agreement: { apartment: { property: { ownerId } } },
+          },
           apartmentId && { agreement: { apartmentId, isArchived: false } },
           tenantId && { agreement: { tenantId, isArchived: false } },
           agreementId && { agreementId, isArchived: false },
           paymentMethod && { method: paymentMethod, isArchived: false },
+          paymentType && { type: paymentType, isArchived: false },
         ].filter(Boolean),
       }),
       ...(paymentAgreement &&
@@ -230,6 +250,10 @@ export class PaymentService {
         paymentDate: true,
         rentEndDate: true,
         createdAt: true,
+        tva: true,
+        bank: true,
+        transferNumber: true,
+        checkNumber: true,
         property: {
           select: {
             id: true,
@@ -304,11 +328,14 @@ export class PaymentService {
       propertyId = property.id;
     }
 
-    if (updatePaymentDto.type === 'income') {
+    if (
+      updatePaymentDto.type === 'income' &&
+      updatePaymentDto.category === 'rent'
+    ) {
       await this.checkAgreementValidity(updatePaymentDto.agreementId ?? '');
     }
 
-    await this.prisma.payment.update({
+    const updatedPayment = await this.prisma.payment.update({
       where: {
         id,
       },
@@ -318,6 +345,10 @@ export class PaymentService {
         paymentDate: updatePaymentDto.paymentDate,
         type: updatePaymentDto.type,
         label: updatePaymentDto.label,
+        tva: updatePaymentDto.tva,
+        bank: updatePaymentDto.bank,
+        transferNumber: updatePaymentDto.transferNumber,
+        checkNumber: updatePaymentDto.checkNumber,
         category: updatePaymentDto.category,
         ...(propertyId &&
           updatePaymentDto.type === 'expense' && {
@@ -332,6 +363,8 @@ export class PaymentService {
         rentEndDate: updatePaymentDto.rentEndDate,
       },
     });
+
+    return { id: updatedPayment.id };
   }
 
   async remove(id: string) {

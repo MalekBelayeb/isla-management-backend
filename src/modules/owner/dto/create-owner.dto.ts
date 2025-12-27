@@ -12,6 +12,7 @@ export const createOwnerDtoSchema = z.object({
   gender: z.enum(['M', 'F']).optional(),
   cin: z.string(),
   rib: z.string(),
+  bank: z.string(),
   type: z.enum(['natural', 'legal']),
 });
 

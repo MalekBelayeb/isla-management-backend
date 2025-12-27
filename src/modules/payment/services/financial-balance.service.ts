@@ -94,7 +94,7 @@ export class FinancialBalanceService {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        paymentDate: 'asc',
       },
     });
 

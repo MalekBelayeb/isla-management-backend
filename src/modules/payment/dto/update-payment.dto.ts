@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PaymentCategory, PaymentMethodType, PaymentType } from 'generated/prisma';
+import {
+  PaymentCategory,
+  PaymentMethodType,
+  PaymentType,
+} from 'generated/prisma';
 import { z } from 'zod';
 export const updatePaymentSchema = z.object({
   amount: z.coerce.number(),
@@ -12,6 +16,12 @@ export const updatePaymentSchema = z.object({
   paymentDate: z.coerce.date().optional(),
   rentStartDate: z.coerce.date().optional(),
   rentEndDate: z.coerce.date().optional(),
+  tva: z.coerce.number().optional(),
+
+  bank: z.string().optional(),
+  checkNumber: z.string().optional(),
+  transferNumber: z.string().optional(),
+
   notes: z.string().optional(),
 });
 
