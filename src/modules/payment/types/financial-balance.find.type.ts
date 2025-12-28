@@ -7,5 +7,6 @@ export type FinancialBalanceFindArgs = {
   endDate?: string;
   agreementId?: string;
   apartmentId?: string;
+  paymentMethod?: string;
   type?: PaymentType;
 };

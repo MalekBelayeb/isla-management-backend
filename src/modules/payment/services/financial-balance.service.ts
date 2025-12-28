@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
 import { FinancialBalanceFindArgs } from '../types/financial-balance.find.type';
 import { taxInPercentage } from 'src/shared/contants/constants';
+import { PaymentMethodType } from 'generated/prisma';
 
 @Injectable()
 export class FinancialBalanceService {
@@ -14,6 +15,7 @@ export class FinancialBalanceService {
     endDate,
     agreementId,
     apartmentId,
+    paymentMethod,
     type,
   }: FinancialBalanceFindArgs) {
     let createdAtCriteria;
@@ -39,6 +41,10 @@ export class FinancialBalanceService {
         isArchived: false,
         ...(createdAtCriteria && createdAtCriteria),
         ...(types && { type: { in: types } }),
+        ...(paymentMethod && {
+          method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
+          isArchived: false,
+        }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && {
           OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
@@ -105,6 +111,10 @@ export class FinancialBalanceService {
         isArchived: false,
         ...(createdAtCriteria && createdAtCriteria),
         ...(types && { type: { in: types } }),
+        ...(paymentMethod && {
+          method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
+          isArchived: false,
+        }),
         ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
         ...(propertyId && {
           OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],

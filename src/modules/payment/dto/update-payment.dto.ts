@@ -18,9 +18,9 @@ export const updatePaymentSchema = z.object({
   rentEndDate: z.coerce.date().optional(),
   tva: z.coerce.number().optional(),
 
-  bank: z.string().optional(),
-  checkNumber: z.string().optional(),
-  transferNumber: z.string().optional(),
+  bank: z.coerce.string().optional(),
+  checkNumber: z.coerce.string().optional(),
+  transferNumber: z.coerce.string().optional(),
 
   notes: z.string().optional(),
 });

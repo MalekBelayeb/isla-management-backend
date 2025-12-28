@@ -14,9 +14,20 @@ FROM node:${NODE_VERSION}-alpine
 # Use production node environment by default.
 ENV NODE_ENV production
 
+#RUN apt-get update && apt-get install -y \
+#    libreoffice \
+#    fonts-dejavu \
+#    fonts-liberation \
+#    fonts-freefont-ttf \
+#    && rm -rf /var/lib/apt/lists/*
+
 # Install pnpm.
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
+
+
+
+
 
 WORKDIR /usr/src/app
 

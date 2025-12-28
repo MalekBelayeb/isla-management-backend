@@ -12,15 +12,15 @@ export const createPaymentSchema = z.object({
   method: z.enum(PaymentMethodType),
   agreementId: z.string().optional(),
   matriculeProperty: z.number().optional(),
-  label: z.string().optional(),
+  label: z.coerce.string().optional(),
   rentStartDate: z.coerce.date().optional(),
   rentEndDate: z.coerce.date().optional(),
   paymentDate: z.coerce.date().optional(),
   tva: z.coerce.number().optional(),
   
-  bank: z.string().optional(),
-  checkNumber: z.string().optional(),
-  transferNumber: z.string().optional(),
+  bank: z.coerce.string().optional(),
+  checkNumber: z.coerce.string().optional(),
+  transferNumber: z.coerce.string().optional(),
 
   notes: z.string().optional(),
 });

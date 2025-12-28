@@ -7,6 +7,8 @@ import { PaymentReceiptContent } from '../types/payment-receipt.type';
 import { consts } from 'src/shared/contants/constants';
 import writtenNumber from 'written-number';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
+//import libre from 'libreoffice-convert';
+import docxPdf from 'docx-pdf';
 
 @Injectable()
 export class PaymentReceiptGeneratorService {
@@ -55,10 +57,27 @@ export class PaymentReceiptGeneratorService {
 
       doc.render(paymentReceiptContent);
 
-      return doc.getZip().generate({
-        type: 'nodebuffer',
-        compression: 'DEFLATE',
-      });
+      const docxBuffer = doc
+        .getZip()
+        .generate({ type: 'nodebuffer', compression: 'DEFLATE' });
+      /*
+      const docxFileName = `payment-receipt-${Date.now()}.docx`;
+      const docxOutputPath = path.join(process.cwd(), 'output', docxFileName);
+
+      fs.mkdirSync(path.dirname(docxOutputPath), { recursive: true });
+      fs.writeFileSync(docxOutputPath, docxBuffer);
+
+      console.log(`DOCX saved at: ${docxOutputPath}`);
+
+      const pdfOutputPath = path.join(
+        process.cwd(),
+        'output',
+        `payment-receipt-${Date.now()}.pdf`,
+      );
+
+      await this.convertDocxToPdfAsync(docxOutputPath, pdfOutputPath);
+*/
+      return docxBuffer;
     } catch (err) {
       console.log(err);
       throw new HttpException(
@@ -66,6 +85,18 @@ export class PaymentReceiptGeneratorService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  private convertDocxToPdfAsync(
+    docxPath: string,
+    pdfPath: string,
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      docxPdf(docxPath, pdfPath, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
   }
 
   private convertNumbersToWrittenForm(amount: number): string {
@@ -98,6 +129,6 @@ export class PaymentReceiptGeneratorService {
     const day = parts.find((p) => p.type === 'day')!.value;
     const year = parts.find((p) => p.type === 'year')!.value;
 
-    return `${month}-${day}-${year}`;
+    return `${day}-${month}-${year}`;
   }
 }

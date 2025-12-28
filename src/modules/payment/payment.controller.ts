@@ -90,6 +90,7 @@ export class PaymentController {
     @Query('ownerId') ownerId?: string,
     @Query('propertyId') propertyId?: string,
     @Query('agreementId') agreementId?: string,
+    @Query('paymentMethod') paymentMethod?: string,
     @Query('apartmentId') apartmentId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
@@ -102,6 +103,7 @@ export class PaymentController {
       endDate,
       agreementId,
       apartmentId,
+      paymentMethod,
       type,
     });
   }
@@ -116,6 +118,7 @@ export class PaymentController {
     const paymentReceiptDocx =
       await this.paymentReceiptGeneratorService.generatePaymentReceipt(id);
     reply
+      //.header('content-type', 'application/pdf')
       .header(
         'content-type',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

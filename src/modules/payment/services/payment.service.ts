@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePaymentDtoType } from '../dto/create-payment.dto';
 import { UpdatePaymentDtoType } from '../dto/update-payment.dto';
 import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { PaymentType, Prisma } from 'generated/prisma';
+import { PaymentMethodType, PaymentType, Prisma } from 'generated/prisma';
 import { PaymentFindAllArgs } from '../types/payment.findAll.type';
 import { consts } from 'src/shared/contants/constants';
 import { Decimal } from 'generated/prisma/runtime/library';
@@ -116,7 +116,6 @@ export class PaymentService {
           },
         };
     }
-
     const whereCriteria = {
       isArchived: false,
       ...(createdAtCriteria && createdAtCriteria),
@@ -133,7 +132,10 @@ export class PaymentService {
           apartmentId && { agreement: { apartmentId, isArchived: false } },
           tenantId && { agreement: { tenantId, isArchived: false } },
           agreementId && { agreementId, isArchived: false },
-          paymentMethod && { method: paymentMethod, isArchived: false },
+          paymentMethod && {
+            method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
+            isArchived: false,
+          },
           paymentType && { type: paymentType, isArchived: false },
         ].filter(Boolean),
       }),
