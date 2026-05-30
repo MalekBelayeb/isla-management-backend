@@ -1,4 +1,4 @@
-import { PaymentType } from 'generated/prisma';
+import { PaymentType } from '@prisma/client';
 
 export type FinancialBalanceFindArgs = {
   ownerId?: string;

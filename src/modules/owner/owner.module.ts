@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { OwnerController } from './owner.controller';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Module({
   controllers: [OwnerController],

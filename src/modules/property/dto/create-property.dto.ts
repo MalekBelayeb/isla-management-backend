@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PropertyType } from 'generated/prisma';
+import { PropertyType } from '@prisma/client';
 import { z } from 'zod';
 
 export const createPropertyDtoSchema = z.object({

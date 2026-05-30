@@ -19,7 +19,7 @@ export class ApartmentMapper {
       } else {
         rentStatus = 'notRented';
       }
-      
+
       return {
         ...item,
         rentStatus,

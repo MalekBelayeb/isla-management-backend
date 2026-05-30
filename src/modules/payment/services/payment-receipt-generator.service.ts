@@ -4,11 +4,10 @@ import * as fs from 'fs';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import { PaymentReceiptContent } from '../types/payment-receipt.type';
-import { consts } from 'src/shared/contants/constants';
 import writtenNumber from 'written-number';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
-//import libre from 'libreoffice-convert';
 import docxPdf from 'docx-pdf';
+import { PrismaService } from '../../../infrastructure/prisma.service';
+import { consts } from '../../../shared/contants/constants';
 
 @Injectable()
 export class PaymentReceiptGeneratorService {

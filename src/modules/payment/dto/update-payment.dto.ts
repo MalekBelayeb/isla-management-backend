@@ -3,7 +3,7 @@ import {
   PaymentCategory,
   PaymentMethodType,
   PaymentType,
-} from 'generated/prisma';
+} from '@prisma/client';
 import { z } from 'zod';
 export const updatePaymentSchema = z.object({
   amount: z.coerce.number(),

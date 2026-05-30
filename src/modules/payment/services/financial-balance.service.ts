@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
 import { FinancialBalanceFindArgs } from '../types/financial-balance.find.type';
-import { taxInPercentage } from 'src/shared/contants/constants';
-import { PaymentMethodType } from 'generated/prisma';
+import { PaymentMethodType } from '@prisma/client';
+import { PrismaService } from '../../../infrastructure/prisma.service';
+import { taxInPercentage } from '../../../shared/contants/constants';
 
 @Injectable()
 export class FinancialBalanceService {

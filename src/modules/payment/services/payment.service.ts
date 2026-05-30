@@ -1,11 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePaymentDtoType } from '../dto/create-payment.dto';
 import { UpdatePaymentDtoType } from '../dto/update-payment.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { PaymentMethodType, PaymentType, Prisma } from 'generated/prisma';
+import { PaymentMethodType, Prisma } from '@prisma/client';
 import { PaymentFindAllArgs } from '../types/payment.findAll.type';
-import { consts } from 'src/shared/contants/constants';
-import { Decimal } from 'generated/prisma/runtime/library';
+import { PrismaService } from '../../../infrastructure/prisma.service';
+import { consts } from '../../../shared/contants/constants';
 
 @Injectable()
 export class PaymentService {

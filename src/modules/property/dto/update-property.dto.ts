@@ -1,4 +1,4 @@
-import { PropertyType } from 'generated/prisma';
+import { PropertyType } from '@prisma/client';
 import z from 'zod';
 
 export const updatePropertyDtoSchema = z.object({

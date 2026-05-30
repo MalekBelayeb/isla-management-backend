@@ -23,9 +23,9 @@ import {
   type UpdatePropertyDtoType,
 } from './dto/update-property.dto';
 import { ApiBody } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
-import { defaultLimitValue } from 'src/shared/contants/constants';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { defaultLimitValue } from '../../shared/contants/constants';
 
 @Controller('api/property')
 export class PropertyController {

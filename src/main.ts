@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -7,9 +6,10 @@ import {
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
+import fastifyCookie from '@fastify/cookie';
 import { GenericExceptionsFilter } from './core/exceptions/generic.exception';
 import { config } from './core/config';
-import fastifyCookie from '@fastify/cookie';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(

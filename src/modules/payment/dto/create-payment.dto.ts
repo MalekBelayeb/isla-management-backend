@@ -3,7 +3,7 @@ import {
   PaymentCategory,
   PaymentMethodType,
   PaymentType,
-} from 'generated/prisma';
+} from '@prisma/client';
 import { z } from 'zod';
 export const createPaymentSchema = z.object({
   amount: z.coerce.number(),
@@ -17,7 +17,7 @@ export const createPaymentSchema = z.object({
   rentEndDate: z.coerce.date().optional(),
   paymentDate: z.coerce.date().optional(),
   tva: z.coerce.number().optional(),
-  
+
   bank: z.coerce.string().optional(),
   checkNumber: z.coerce.string().optional(),
   transferNumber: z.coerce.string().optional(),

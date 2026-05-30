@@ -4,9 +4,9 @@ import {
   ArgumentMetadata,
   BadRequestException,
 } from '@nestjs/common';
-import { InvalidRequestException } from 'src/core/exceptions/invalid.request.exception';
-import { consts } from 'src/shared/contants/constants';
 import { ZodObject, ZodError } from 'zod';
+import { consts } from '../../shared/contants/constants';
+import { InvalidRequestException } from '../exceptions/invalid.request.exception';
 
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {

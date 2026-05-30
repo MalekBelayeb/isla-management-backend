@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { type CreateOwnerDtoType } from './dto/create-owner.dto';
 import { type UpdateOwnerDtoType } from './dto/update-owner.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
 import { OwnerFindAllArgs } from './types/owner.findAll.type';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Injectable()
 export class OwnerService {

@@ -1,4 +1,4 @@
-import { ApartmentType } from 'generated/prisma';
+import { ApartmentType } from '@prisma/client';
 
 export type ApartmentFindAllArgs = {
   searchTerm?: string;

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AgreementStatus, PaymentFrequency } from 'generated/prisma';
+import { AgreementStatus, PaymentFrequency } from '@prisma/client';
+
 import { z } from 'zod';
 export const createAgreementSchema = z.object({
   //matricule: z.string(),

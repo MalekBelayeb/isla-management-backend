@@ -23,11 +23,11 @@ import {
   updateApartmentDtoSchema,
   type UpdateApartmentDtoType,
 } from './dto/update-apartment.dto';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
-import { ApartmentType } from 'generated/prisma';
-import { defaultLimitValue } from 'src/shared/contants/constants';
+import { ApartmentType } from '@prisma/client';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { defaultLimitValue } from '../../shared/contants/constants';
 
 @Controller('api/apartment')
 export class ApartmentController {

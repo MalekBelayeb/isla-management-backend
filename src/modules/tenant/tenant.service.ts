@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTenantDtoType } from './dto/create-tenant.dto';
 import { UpdateTenantDtoType } from './dto/update-tenant.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { Prisma, Tenant } from 'generated/prisma';
+import { Prisma, Tenant } from '@prisma/client';
 import { TenantFindAllArgs } from './types/tenant.findAll.type';
 import { TenantMapper } from './mappers/tenants.mapper';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Injectable()
 export class TenantService {

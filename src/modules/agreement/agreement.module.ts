@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AgreementService } from './agreement.service';
 import { AgreementController } from './agreement.controller';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Module({
   controllers: [AgreementController],

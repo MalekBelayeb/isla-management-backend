@@ -14,7 +14,6 @@ import {
   loginRequestDtoSchema,
   LoginRequestApiBody,
 } from '../dto/requests/login.request.dto';
-import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../service/auth.service';
 import {
@@ -22,15 +21,16 @@ import {
   registerRequestDtoSchema,
   type RegisterRequestDtoType,
 } from '../dto/requests/register.request.dto';
-import { ApiResponseDto } from 'src/core/models/api.response.dto';
 import {
   LoginResponseApiBody,
   LoginResponseDto,
 } from '../dto/response/login.response.dto';
 import { AuthUser } from '../dto/response/register.response.dto';
-import { config } from 'src/core/config';
 import { type FastifyReply } from 'fastify';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
+import { JwtAuthGuard } from '../../../core/guards/jwt-auth-guard';
+import { config } from '../../../core/config';
+import { ApiResponseDto } from '../../../core/models/api.response.dto';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 @ApiTags('Auth')
 @Controller('api/auth')

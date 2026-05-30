@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAgreementDtoType } from './dto/create-agreement.dto';
 import { UpdateAgreementDtoType } from './dto/update-agreement.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
 import { AgreementFindAllArgs } from './types/agreement.findAll.type';
-import { consts } from 'src/shared/contants/constants';
+import { consts } from '../../shared/contants/constants';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Injectable()
 export class AgreementService {

@@ -19,15 +19,15 @@ import {
   createOwnerDtoSchema,
   type CreateOwnerDtoType,
 } from './dto/create-owner.dto';
-import { ApiBody, ApiCookieAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import {
   UpdateOwnerDtoApiBody,
   updateOwnerDtoSchema,
   type UpdateOwnerDtoType,
 } from './dto/update-owner.dto';
-import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
-import { defaultLimitValue } from 'src/shared/contants/constants';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { defaultLimitValue } from '../../shared/contants/constants';
 
 @Controller('api/owner')
 export class OwnerController {

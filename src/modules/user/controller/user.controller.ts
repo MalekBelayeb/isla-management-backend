@@ -1,9 +1,9 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { ApiResponseDto } from 'src/core/models/api.response.dto';
 import { GetUserDto } from '../dto/get-user.dto';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
 import { type FastifyRequest } from 'fastify';
+import { ApiResponseDto } from '../../../core/models/api.response.dto';
+import { JwtAuthGuard } from '../../../core/guards/jwt-auth-guard';
 
 @Controller('api/user')
 export class UserController {

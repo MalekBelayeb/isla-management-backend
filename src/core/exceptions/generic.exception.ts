@@ -4,21 +4,22 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
-import { consts } from 'src/shared/contants/constants';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { InvalidRequestException } from './invalid.request.exception';
+import { consts } from '../../shared/contants/constants';
 
 @Catch()
 export class GenericExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
-    const request = ctx.getRequest();
+    const request = ctx.getRequest<FastifyRequest>();
 
     let statusCode = HttpStatus.BAD_REQUEST;
-    let message: any = consts.message.error;
-    let error: any;
+    let message: string | object = consts.message.error;
+    let error: string | object | undefined;
 
     if (exception instanceof InvalidRequestException) {
       statusCode = exception.getStatus?.() ?? HttpStatus.BAD_REQUEST;

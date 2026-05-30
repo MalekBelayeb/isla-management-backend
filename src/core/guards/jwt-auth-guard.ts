@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { JwtPayload } from 'src/modules/auth/models/jwt-payload.model';
+import { JwtPayload } from '../../modules/auth/models/jwt-payload.model';
 
 declare module 'fastify' {
   interface FastifyRequest {

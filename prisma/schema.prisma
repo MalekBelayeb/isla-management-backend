@@ -1,17 +1,184 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  firstname  String
+  lastname   String
+  password   String
+  role       Role     @default(agent)
+  createdAt  DateTime @default(now())
+  isArchived Boolean  @default(false)
+
+  @@index([role])
+  @@index([isArchived])
+  @@index([createdAt])
+}
+
+model Owner {
+  id          String          @id @default(uuid())
+  matricule   Int             @default(autoincrement())
+  firstname   String?
+  lastname    String?
+  fullname    String?
+  gender      GenderType?     @default(M)
+  cin         String?
+  email       String?
+  nationality NationalityType @default(tn)
+  phoneNumber String
+  rib         String
+  society     String?
+  taxId       String?
+  type        OwnerType       @default(natural)
+  createdAt   DateTime        @default(now())
+  isArchived  Boolean         @default(false)
+  bank        String          @default("")
+  properties  Property[]
+
+  @@index([email])
+  @@index([cin])
+  @@index([matricule])
+  @@index([isArchived])
+}
+
+model Property {
+  id                 String       @id @default(uuid())
+  matricule          Int          @default(autoincrement())
+  address            String
+  type               PropertyType
+  ownerId            String
+  profitInPercentage Float        @default(10)
+  createdAt          DateTime     @default(now())
+  isArchived         Boolean      @default(false)
+  apartments         Apartment[]
+  Payment            Payment[]
+  owner              Owner        @relation(fields: [ownerId], references: [id])
+
+  @@index([ownerId])
+  @@index([type])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
+}
+
+model Apartment {
+  id          String        @id @default(uuid())
+  matricule   Int           @default(autoincrement())
+  address     String
+  type        ApartmentType
+  description String
+  price       Float         @default(0)
+  rooms       Int?
+  createdAt   DateTime      @default(now())
+  isArchived  Boolean       @default(false)
+  propertyId  String
+  agreements  Agreement[]
+  property    Property      @relation(fields: [propertyId], references: [id])
+  Payment     Payment[]
+
+  @@index([propertyId])
+  @@index([type])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
+}
+
+model Tenant {
+  id          String      @id @default(uuid())
+  matricule   Int         @default(autoincrement())
+  firstname   String
+  lastname    String
+  fullname    String      @default("")
+  email       String      @default("")
+  gender      GenderType  @default(M)
+  cin         String
+  phoneNumber String
+  nationality String
+  address     String      @default("")
+  job         String      @default("")
+  createdAt   DateTime    @default(now())
+  isArchived  Boolean     @default(false)
+  agreements  Agreement[]
+  Payment     Payment[]
+
+  @@index([email])
+  @@index([cin])
+  @@index([matricule])
+  @@index([isArchived])
+  @@index([createdAt])
+}
+
+model Agreement {
+  id                String           @id @default(uuid())
+  matricule         Int              @default(autoincrement())
+  rentAmount        Decimal
+  nbDaysOfTolerance Int              @default(10)
+  deposit           Decimal?
+  firstDayOfPayment DateTime?
+  paymentFrequency  PaymentFrequency @default(MONTHLY)
+  startDate         DateTime
+  signedAt          DateTime?        @default(now())
+  terminatedAt      DateTime?
+  terminationReason String?
+  status            AgreementStatus  @default(ACTIVE)
+  notes             String?
+  documentUrl       String?
+  isArchived        Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  apartmentId       String
+  tenantId          String
+  apartment         Apartment        @relation(fields: [apartmentId], references: [id])
+  tenant            Tenant           @relation(fields: [tenantId], references: [id])
+  payments          Payment[]
+
+  @@index([apartmentId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([isArchived])
+  @@index([createdAt])
+}
+
+model Payment {
+  id             String            @id @default(uuid())
+  amount         Decimal
+  paymentDate    DateTime          @default(now())
+  category       PaymentCategory   @default(others)
+  type           PaymentType
+  method         PaymentMethodType
+  label          String            @default("")
+  rentStartDate  DateTime?         @default(now())
+  rentEndDate    DateTime?         @default(now())
+  notes          String            @default("")
+  createdAt      DateTime          @default(now())
+  isArchived     Boolean           @default(false)
+  propertyId     String?
+  tva            Decimal?          @default(19)
+  bank           String?
+  checkNumber    String?
+  transferNumber String?
+  agreementId    String?
+  apartmentId    String?
+  tenantId       String?
+  agreement      Agreement?        @relation(fields: [agreementId], references: [id])
+  Apartment      Apartment?        @relation(fields: [apartmentId], references: [id])
+  property       Property?         @relation(fields: [propertyId], references: [id])
+  Tenant         Tenant?           @relation(fields: [tenantId], references: [id])
+
+  @@index([propertyId])
+  @@index([apartmentId])
+  @@index([tenantId])
+  @@index([agreementId])
+  @@index([paymentDate])
+  @@index([category])
+  @@index([type])
+  @@index([isArchived])
+  @@index([createdAt])
 }
 
 enum Role {
@@ -71,14 +238,14 @@ enum PaymentType {
 }
 
 enum PaymentCategory {
-  rent // Loyer
-  deposit // Caution / Dépôt de garantie
-  agency_fees // Frais d'agence
-  maintenance_fees // Frais d'entretien
-  utility_payments // Charges (eau, électricité, gaz, etc.)
-  cleaning_fees // Frais de nettoyage
-  furniture_rental_fees // Location de mobilier
-  home_insurance_payment // Assurance habitation
+  rent
+  deposit
+  agency_fees
+  maintenance_fees
+  utility_payments
+  cleaning_fees
+  furniture_rental_fees
+  home_insurance_payment
   others
 }
 
@@ -92,181 +259,4 @@ enum PaymentFrequency {
 enum AgreementStatus {
   ACTIVE
   SUSPENDED
-}
-
-model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  firstname  String
-  lastname   String
-  password   String
-  role       Role     @default(agent)
-  createdAt  DateTime @default(now())
-  isArchived Boolean  @default(false)
-
-  @@index([role])
-  @@index([isArchived])
-  @@index([createdAt])
-}
-
-model Owner {
-  id          String          @id @default(uuid())
-  matricule   Int             @default(autoincrement())
-  firstname   String?
-  lastname    String?
-  fullname    String?
-  gender      GenderType?     @default(M)
-  cin         String?
-  email       String?
-  nationality NationalityType @default(tn)
-  phoneNumber String
-  rib         String
-  bank        String          @default("")
-  society     String?
-  taxId       String?
-  type        OwnerType       @default(natural)
-  createdAt   DateTime        @default(now())
-  isArchived  Boolean         @default(false)
-  properties  Property[]
-
-  @@index([email])
-  @@index([cin])
-  @@index([matricule])
-  @@index([isArchived])
-}
-
-model Property {
-  id                 String       @id @default(uuid())
-  matricule          Int          @default(autoincrement())
-  address            String
-  type               PropertyType
-  ownerId            String
-  profitInPercentage Float        @default(10)
-  owner              Owner        @relation(fields: [ownerId], references: [id])
-  createdAt          DateTime     @default(now())
-  isArchived         Boolean      @default(false)
-  apartments         Apartment[]
-  Payment            Payment[]
-
-  @@index([ownerId])
-  @@index([type])
-  @@index([matricule])
-  @@index([isArchived])
-  @@index([createdAt])
-}
-
-model Apartment {
-  id          String        @id @default(uuid())
-  matricule   Int           @default(autoincrement())
-  address     String
-  type        ApartmentType
-  description String
-  price       Float         @default(0)
-  rooms       Int?
-  createdAt   DateTime      @default(now())
-  isArchived  Boolean       @default(false)
-  propertyId  String
-  property    Property      @relation(fields: [propertyId], references: [id])
-  agreements  Agreement[]
-  Payment     Payment[]
-
-  @@index([propertyId])
-  @@index([type])
-  @@index([matricule])
-  @@index([isArchived])
-  @@index([createdAt])
-}
-
-model Tenant {
-  id          String      @id @default(uuid())
-  matricule   Int         @default(autoincrement())
-  firstname   String
-  lastname    String
-  fullname    String      @default("")
-  email       String      @default("")
-  gender      GenderType  @default(M)
-  cin         String
-  phoneNumber String
-  nationality String
-  address     String      @default("")
-  job         String      @default("")
-  createdAt   DateTime    @default(now())
-  isArchived  Boolean     @default(false)
-  agreements  Agreement[]
-  Payment     Payment[]
-
-  @@index([email])
-  @@index([cin])
-  @@index([matricule])
-  @@index([isArchived])
-  @@index([createdAt])
-}
-
-model Agreement {
-  id                String           @id @default(uuid())
-  matricule         Int              @default(autoincrement())
-  rentAmount        Decimal
-  nbDaysOfTolerance Int              @default(10)
-  deposit           Decimal?
-  firstDayOfPayment DateTime?
-  paymentFrequency  PaymentFrequency @default(MONTHLY)
-  startDate         DateTime
-  signedAt          DateTime?        @default(now())
-  terminatedAt      DateTime?
-  terminationReason String?
-  status            AgreementStatus  @default(ACTIVE)
-  notes             String?
-  documentUrl       String?
-  isArchived        Boolean          @default(false)
-  createdAt         DateTime         @default(now())
-  apartmentId       String
-  apartment         Apartment        @relation(fields: [apartmentId], references: [id])
-  tenantId          String
-  tenant            Tenant           @relation(fields: [tenantId], references: [id])
-  payments          Payment[]
-
-  @@index([apartmentId])
-  @@index([tenantId])
-  @@index([status])
-  @@index([isArchived])
-  @@index([createdAt])
-}
-
-model Payment {
-  id            String            @id @default(uuid())
-  amount        Decimal
-  paymentDate   DateTime          @default(now())
-  category      PaymentCategory   @default(others)
-  type          PaymentType
-  method        PaymentMethodType
-  label         String            @default("")
-  rentStartDate DateTime?         @default(now())
-  rentEndDate   DateTime?         @default(now())
-  notes         String            @default("")
-  createdAt     DateTime          @default(now())
-  isArchived    Boolean           @default(false)
-  property      Property?         @relation(fields: [propertyId], references: [id])
-  propertyId    String?
-
-  tva            Decimal? @default(19)
-  bank           String?
-  checkNumber    String?
-  transferNumber String?
-
-  agreement   Agreement? @relation(fields: [agreementId], references: [id])
-  agreementId String?
-  Apartment   Apartment? @relation(fields: [apartmentId], references: [id])
-  apartmentId String?
-  Tenant      Tenant?    @relation(fields: [tenantId], references: [id])
-  tenantId    String?
-
-  @@index([propertyId])
-  @@index([apartmentId])
-  @@index([tenantId])
-  @@index([agreementId])
-  @@index([paymentDate])
-  @@index([category])
-  @@index([type])
-  @@index([isArchived])
-  @@index([createdAt])
 }

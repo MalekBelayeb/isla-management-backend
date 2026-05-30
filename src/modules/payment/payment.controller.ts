@@ -21,19 +21,19 @@ import {
   type CreatePaymentDtoType,
   createPaymentSchema,
 } from './dto/create-payment.dto';
-import { JwtAuthGuard } from 'src/core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 import { ApiBody } from '@nestjs/swagger';
 import {
   UpdatePaymentDtoApiBody,
   type UpdatePaymentDtoType,
   updatePaymentSchema,
 } from './dto/update-payment.dto';
-import { defaultLimitValue } from 'src/shared/contants/constants';
-import { PaymentType } from 'generated/prisma';
+import { PaymentType } from '@prisma/client';
 import { FinancialBalanceService } from './services/financial-balance.service';
 import { PaymentReceiptGeneratorService } from './services/payment-receipt-generator.service';
 import { type FastifyReply } from 'fastify';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { defaultLimitValue } from '../../shared/contants/constants';
 
 @Controller('api/payment')
 export class PaymentController {

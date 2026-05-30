@@ -1,16 +1,11 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginRequestDtoType } from '../dto/requests/login.request.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../models/jwt-payload.model';
 import { RegisterRequestDtoType } from '../dto/requests/register.request.dto';
-import { consts } from 'src/shared/contants/constants';
+import { PrismaService } from '../../../infrastructure/prisma.service';
+import { consts } from '../../../shared/contants/constants';
 
 @Injectable()
 export class AuthService {
@@ -19,26 +14,30 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   async login(loginDto: LoginRequestDtoType) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email: loginDto.email,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email: loginDto.email,
+        },
+      });
+      if (
+        user === null ||
+        !bcrypt.compareSync(loginDto.password, user.password)
+      ) {
+        throw new HttpException( 
+          consts.message.failedLogin,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
 
-    if (
-      user === null ||
-      !bcrypt.compareSync(loginDto.password, user.password)
-    ) {
-      throw new HttpException(
-        consts.message.failedLogin,
-        HttpStatus.UNAUTHORIZED,
-      );
+      return {
+        id: user.id,
+        token: await this.jwtService.signAsync({ id: user.id }),
+      };
+    } catch (err) {
+      console.log(err);
+      return { token: '' };
     }
-
-    return {
-      id: user.id,
-      token: await this.jwtService.signAsync({ id: user.id }),
-    };
   }
 
   async register(registerDto: RegisterRequestDtoType) {

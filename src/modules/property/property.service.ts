@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePropertyDtoType } from './dto/create-property.dto';
 import { type UpdatePropertyDtoType } from './dto/update-property.dto';
-import { PrismaService } from 'src/infrastructure/prisma.infra';
 import { PropertyFindAllArgs } from './types/property.findAll.type';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../infrastructure/prisma.service';
 
 @Injectable()
 export class PropertyService {

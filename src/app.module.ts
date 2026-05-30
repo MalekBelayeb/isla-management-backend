@@ -5,7 +5,7 @@ import { UserService } from './modules/user/service/user.service';
 import { UserModule } from './modules/user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HTTPLoggingInterceptor } from './core/interceptors/http.logging.interceptors';
-import { PrismaService } from './infrastructure/prisma.infra';
+import { PrismaService } from './infrastructure/prisma.service';
 import { OwnerModule } from './modules/owner/owner.module';
 import { AgreementModule } from './modules/agreement/agreement.module';
 import { ApartmentModule } from './modules/apartment/apartment.module';
@@ -13,6 +13,7 @@ import { PropertyModule } from './modules/property/property.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ConfigModule } from '@nestjs/config';
+import 'dotenv/config';
 
 @Module({
   imports: [
