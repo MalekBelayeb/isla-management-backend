@@ -93,6 +93,9 @@ export class AgreementService {
     startDate,
     endDate,
     agreementProperty,
+    tenantName,
+    ownerName,
+    apartmentAdress,
     agreementStatus,
     limit,
     page,
@@ -123,6 +126,21 @@ export class AgreementService {
             property: { matricule: Number(agreementProperty) },
           },
         }),
+      ...(tenantName && {
+        tenant: { fullname: { contains: tenantName, mode: 'insensitive' } },
+      }),
+      ...(apartmentAdress && {
+        apartment: {
+          address: { contains: apartmentAdress, mode: 'insensitive' },
+        },
+      }),
+      ...(ownerName && {
+        apartment: {
+          property: {
+            owner: { fullname: { contains: ownerName, mode: 'insensitive' } },
+          },
+        },
+      }),
       ...((apartmentId || tenantId || searchTerm || agreementStatus) && {
         OR: [
           searchTerm &&

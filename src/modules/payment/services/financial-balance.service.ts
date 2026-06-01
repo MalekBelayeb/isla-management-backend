@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FinancialBalanceFindArgs } from '../types/financial-balance.find.type';
-import { PaymentMethodType } from '@prisma/client';
+import { PaymentMethodType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { taxInPercentage } from '../../../shared/contants/constants';
 
@@ -8,51 +8,98 @@ import { taxInPercentage } from '../../../shared/contants/constants';
 export class FinancialBalanceService {
   constructor(private prisma: PrismaService) {}
 
-  async findFinancialBalance({
-    ownerId,
-    propertyId,
-    startDate,
-    endDate,
-    agreementId,
-    apartmentId,
-    paymentMethod,
-    type,
-  }: FinancialBalanceFindArgs) {
-    let createdAtCriteria;
+  async findFinancialBalance(financialBalanceArgs: FinancialBalanceFindArgs) {
+    const { startDate, endDate, type, previousStartDate, previousEndDate } =
+      financialBalanceArgs;
 
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      end.setHours(23, 59, 59, 999);
-      createdAtCriteria = startDate &&
-        endDate && {
-          paymentDate: {
-            gte: start,
-            lte: end,
-          },
-        };
+    if (!startDate || !endDate) {
+      return;
     }
 
-    const types = type?.split(',');
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-    const payments = await this.prisma.payment.findMany({
-      where: {
+    end.setHours(23, 59, 59, 999);
+
+    const paymentDateIntervalCriteria: Prisma.DateTimeFilter = {
+      gte: start,
+      lte: end,
+    };
+
+    const types = type?.split(',') ?? [];
+
+    const financialBalance = await this.calculateFinancialBalanceByDateInterval(
+      paymentDateIntervalCriteria,
+      types,
+      financialBalanceArgs,
+    );
+
+    let previousPeriodFinancialBalance;
+
+    // calculate previous period financial balance, to get amount that still needs to be paid from previous period
+    if (previousStartDate && previousEndDate) {
+      const previousStart = new Date(previousStartDate);
+      const previousEnd = new Date(previousEndDate);
+
+      end.setHours(23, 59, 59, 999);
+
+      const previousDateIntervalCriteria: Prisma.DateTimeFilter = {
+        gte: previousStart,
+        lte: previousEnd,
+      };
+
+      previousPeriodFinancialBalance =
+        await this.calculateFinancialBalanceByDateInterval(
+          previousDateIntervalCriteria,
+          types,
+          financialBalanceArgs,
+        );
+    }
+
+    return {
+      ...financialBalance,
+      ...(previousPeriodFinancialBalance && {
+        netBalance:
+          financialBalance.netBalance -
+          previousPeriodFinancialBalance.netBalance,
+        totalExpense:
+          financialBalance.totalExpense +
+          previousPeriodFinancialBalance.netBalance,
+        previousPeriodNetBalance: previousPeriodFinancialBalance.netBalance,
+      }),
+    };
+  }
+
+  // Calculate property/apartment.. financial balance, total income and total expense by date interval
+  async calculateFinancialBalanceByDateInterval(
+    paymentDateIntervalCriteria: Prisma.DateTimeFilter,
+    types: string[],
+    financialBalanceArgs: FinancialBalanceFindArgs,
+  ) {
+    const { ownerId, propertyId, agreementId, apartmentId, paymentMethod } =
+      financialBalanceArgs;
+
+    const whereCriteria = {
+      isArchived: false,
+      ...(paymentDateIntervalCriteria && {
+        paymentDate: paymentDateIntervalCriteria,
+      }),
+      ...(types.length && { type: { in: types } }),
+      ...(paymentMethod && {
+        method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
         isArchived: false,
-        ...(createdAtCriteria && createdAtCriteria),
-        ...(types && { type: { in: types } }),
-        ...(paymentMethod && {
-          method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
-          isArchived: false,
-        }),
-        ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
-        ...(propertyId && {
-          OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
-        }),
-        ...(agreementId && { agreementId }),
-        ...(apartmentId && { agreement: { apartmentId } }),
-      },
+      }),
+      ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
+      ...(propertyId && {
+        OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
+      }),
+      ...(agreementId && { agreementId }),
+      ...(apartmentId && { agreement: { apartmentId } }),
+    } as Prisma.PaymentWhereInput;
 
+    // get all payments by criteria
+    const payments = await this.prisma.payment.findMany({
+      where: whereCriteria,
       select: {
         id: true,
         amount: true,
@@ -104,24 +151,11 @@ export class FinancialBalanceService {
       },
     });
 
+    // get sum of expenses and sum of incomes by criteria
     const groupedSums = await this.prisma.payment.groupBy({
       by: ['type'],
       _sum: { amount: true },
-      where: {
-        isArchived: false,
-        ...(createdAtCriteria && createdAtCriteria),
-        ...(types && { type: { in: types } }),
-        ...(paymentMethod && {
-          method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
-          isArchived: false,
-        }),
-        ...(ownerId && { agreement: { apartment: { property: { ownerId } } } }),
-        ...(propertyId && {
-          OR: [{ agreement: { apartment: { propertyId } } }, { propertyId }],
-        }),
-        ...(agreementId && { agreementId }),
-        ...(apartmentId && { agreement: { apartmentId } }),
-      },
+      where: whereCriteria,
     });
 
     const totalIncome =
@@ -140,6 +174,7 @@ export class FinancialBalanceService {
 
     const property = payments.find((item) => item.type === 'income')?.agreement
       ?.apartment.property;
+
     if (propertyId && totalIncome > 0 && property) {
       profit = this.calculateAgencyProfitByProperty(
         totalIncome,
@@ -147,6 +182,7 @@ export class FinancialBalanceService {
         property.profitInPercentage,
       );
     }
+
     const totalAgencyExpense =
       groupedSums
         .find((item) => item.type === 'expense_agency')
@@ -170,6 +206,7 @@ export class FinancialBalanceService {
     };
   }
 
+  // Calculate agency profit with and without tax
   calculateAgencyProfitByProperty(
     totalIncome: number,
     taxInPercentage: number,

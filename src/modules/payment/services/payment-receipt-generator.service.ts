@@ -102,14 +102,16 @@ export class PaymentReceiptGeneratorService {
     const dinarsValue = Math.floor(amount);
     const millimesValue = Math.round((amount - dinarsValue) * 1000);
 
-    let dinarsWrittenForm = writtenNumber(dinarsValue, {
+    const dinarsWrittenForm = writtenNumber(dinarsValue, {
       lang: 'fr',
     }).toUpperCase();
-    let millimesWrittenForm = writtenNumber(millimesValue, {
+    const millimesWrittenForm = writtenNumber(millimesValue, {
       lang: 'fr',
     }).toUpperCase();
 
-    if (millimesValue <= 0) return `${dinarsWrittenForm} DINARS`;
+    if (millimesValue <= 0) {
+      return `${dinarsWrittenForm} DINARS`;
+    }
 
     return `${dinarsWrittenForm} DINARS ET ${millimesWrittenForm} MILLIMES`;
   }

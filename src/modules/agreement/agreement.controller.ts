@@ -49,6 +49,11 @@ export class AgreementController {
     @Query('apartmentId') apartmentId?: string,
     @Query('tenantId') tenantId?: string,
     @Query('agreementProperty') agreementProperty?: string,
+
+    @Query('tenantName') tenantName?: string,
+    @Query('apartmentAdress') apartmentAdress?: string,
+    @Query('ownerName') ownerName?: string,
+
     @Query('agreementStatus')
     agreementStatus?: 'active' | 'expired' | 'suspended',
     @Query('startDate') startDate?: string,
@@ -61,6 +66,9 @@ export class AgreementController {
       tenantId,
       agreementProperty,
       agreementStatus,
+      tenantName,
+      apartmentAdress,
+      ownerName,
       startDate,
       endDate,
       limit,

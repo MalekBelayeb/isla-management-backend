@@ -5,6 +5,9 @@ export type AgreementFindAllArgs = {
   agreementProperty?: string;
   startDate?: string;
   endDate?: string;
+  tenantName?: string;
+  apartmentAdress?: string;
+  ownerName?: string;
   agreementStatus?: 'active' | 'expired' | 'suspended';
   limit?: number;
   page?: number;
