@@ -27,20 +27,16 @@ import {
   type UpdatePaymentDtoType,
   updatePaymentSchema,
 } from './dto/update-payment.dto';
-import { PaymentType } from '@prisma/client';
 import { FinancialBalanceService } from './services/financial-balance.service';
-import { PaymentReceiptGeneratorService } from './services/payment-receipt-generator.service';
-import { type FastifyReply } from 'fastify';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { defaultLimitValue } from '../../shared/contants/constants';
+import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 
 @Controller('api/payment')
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly financialBalanceService: FinancialBalanceService,
-    private readonly paymentReceiptGeneratorService: PaymentReceiptGeneratorService,
   ) {}
 
   @Post()
@@ -110,28 +106,6 @@ export class PaymentController {
       paymentMethod,
       type,
     });
-  }
-
-  @Get('generate-receipt/:id')
-  @UseGuards(JwtAuthGuard)
-  async generatePaymentReceipt(
-    @Param('id') id: string,
-    @Res() reply: FastifyReply,
-  ) {
-    console.log('qsdqsdsqd');
-    const paymentReceiptDocx =
-      await this.paymentReceiptGeneratorService.generatePaymentReceipt(id);
-    reply
-      //.header('content-type', 'application/pdf')
-      .header(
-        'content-type',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      )
-      .header(
-        'content-disposition',
-        'attachment; filename="payment-receipt.docx"',
-      )
-      .send(paymentReceiptDocx);
   }
 
   @Get(':id')

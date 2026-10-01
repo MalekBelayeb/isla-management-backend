@@ -7,6 +7,7 @@ import {
 import { z } from 'zod';
 export const updatePaymentSchema = z.object({
   amount: z.coerce.number(),
+  extraCharge: z.coerce.number().optional(),
   type: z.enum(PaymentType),
   method: z.enum(PaymentMethodType),
   category: z.enum(PaymentCategory),

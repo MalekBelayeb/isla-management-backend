@@ -63,6 +63,7 @@ export class PaymentService {
         amount: createPaymentDto.amount,
         method: createPaymentDto.method,
         paymentDate: createPaymentDto.paymentDate,
+        extraCharge: createPaymentDto.extraCharge,
         type: createPaymentDto.type,
         bank: createPaymentDto.bank,
         checkNumber: createPaymentDto.checkNumber,
@@ -242,6 +243,7 @@ export class PaymentService {
       select: {
         id: true,
         amount: true,
+        extraCharge: true,
         type: true,
         method: true,
         category: true,
@@ -342,6 +344,7 @@ export class PaymentService {
       },
       data: {
         amount: updatePaymentDto.amount,
+        extraCharge: updatePaymentDto.extraCharge,
         method: updatePaymentDto.method,
         paymentDate: updatePaymentDto.paymentDate,
         type: updatePaymentDto.type,

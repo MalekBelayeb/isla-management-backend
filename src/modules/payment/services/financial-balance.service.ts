@@ -3,6 +3,7 @@ import { FinancialBalanceFindArgs } from '../types/financial-balance.find.type';
 import { PaymentMethodType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { taxInPercentage } from '../../../shared/contants/constants';
+import { AgencyProfitType } from '../types/agency-profit.type';
 
 @Injectable()
 export class FinancialBalanceService {
@@ -27,7 +28,7 @@ export class FinancialBalanceService {
     };
 
     const types = type?.split(',') ?? [];
-
+    
     const financialBalance = await this.calculateFinancialBalanceByDateInterval(
       paymentDateIntervalCriteria,
       types,
@@ -56,15 +57,15 @@ export class FinancialBalanceService {
         );
     }
 
+    const totalIncome =
+      financialBalance.totalIncome +
+      (previousPeriodFinancialBalance?.netBalance ?? 0);
+
     return {
       ...financialBalance,
       ...(previousPeriodFinancialBalance && {
-        netBalance:
-          financialBalance.netBalance -
-          previousPeriodFinancialBalance.netBalance,
-        totalExpense:
-          financialBalance.totalExpense +
-          previousPeriodFinancialBalance.netBalance,
+        netBalance: totalIncome - financialBalance.totalExpense,
+        totalIncome,
         previousPeriodNetBalance: previousPeriodFinancialBalance.netBalance,
       }),
     };
@@ -103,6 +104,7 @@ export class FinancialBalanceService {
       select: {
         id: true,
         amount: true,
+        extraCharge: true,
         type: true,
         label: true,
         category: true,
@@ -150,27 +152,33 @@ export class FinancialBalanceService {
         paymentDate: 'asc',
       },
     });
+    console.log(whereCriteria);
 
     // get sum of expenses and sum of incomes by criteria
     const groupedSums = await this.prisma.payment.groupBy({
       by: ['type'],
-      _sum: { amount: true },
+      _sum: { amount: true, extraCharge: true },
       where: whereCriteria,
     });
 
-    const totalIncome =
+    const groupedIncome = groupedSums.find((item) => item.type === 'income');
+
+    const totalAgencyExpense =
       groupedSums
-        .find((item) => item.type === 'income')
+        .find((item) => item.type === 'expense_agency')
         ?._sum.amount?.toNumber() ?? 0;
 
-    let profit:
-      | {
-          grossProfit: number;
-          taxAmount: number;
-          profitWithTax: number;
-          profitInPercentage: number;
-        }
-      | undefined;
+    const totalExpense =
+      groupedSums
+        .find((item) => item.type === 'expense')
+        ?._sum.amount?.toNumber() ?? 0;
+
+    // totalIncome sum of (sum amount) + (sum extra charges)
+    const totalIncome =
+      (groupedIncome?._sum.amount?.toNumber() ?? 0) +
+      (groupedIncome?._sum.extraCharge?.toNumber() ?? 0);
+
+    let profit: AgencyProfitType | undefined;
 
     const property = payments.find((item) => item.type === 'income')?.agreement
       ?.apartment.property;
@@ -183,24 +191,16 @@ export class FinancialBalanceService {
       );
     }
 
-    const totalAgencyExpense =
-      groupedSums
-        .find((item) => item.type === 'expense_agency')
-        ?._sum.amount?.toNumber() ?? 0;
+    // sum of total Expense + agency profit with tax +  total agency expense
+    const totalNetExpense =
+      totalExpense + (profit?.profitWithTax ?? 0) + (totalAgencyExpense ?? 0);
 
-    const totalExpense =
-      (groupedSums
-        .find((item) => item.type === 'expense')
-        ?._sum.amount?.toNumber() ?? 0) +
-      (profit?.profitWithTax ?? 0) +
-      (totalAgencyExpense ?? 0);
-
-    const netBalance: number = totalIncome - totalExpense;
+    const netBalance: number = totalIncome - totalNetExpense;
 
     return {
       netBalance,
       totalIncome,
-      totalExpense,
+      totalExpense: totalNetExpense,
       payments,
       ...(profit && { profit }),
     };
@@ -216,6 +216,12 @@ export class FinancialBalanceService {
     const taxAmount = (grossProfit * taxInPercentage) / 100; // tva profit
     const profitWithTax = grossProfit + taxAmount;
 
-    return { grossProfit, taxAmount, profitWithTax, profitInPercentage };
+    return {
+      totalIncome,
+      grossProfit,
+      taxAmount,
+      profitWithTax,
+      profitInPercentage,
+    };
   }
 }

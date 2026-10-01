@@ -147,6 +147,7 @@ model Agreement {
 model Payment {
   id             String            @id @default(uuid())
   amount         Decimal
+  extraCharge    Decimal           @default(0)
   paymentDate    DateTime          @default(now())
   category       PaymentCategory   @default(others)
   type           PaymentType

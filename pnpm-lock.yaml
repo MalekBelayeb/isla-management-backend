@@ -83,9 +83,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      written-number:
-        specifier: ^0.11.1
-        version: 0.11.1
       zod:
         specifier: ^4.0.17
         version: 4.4.3
@@ -4016,9 +4013,6 @@ packages:
   write-file-atomic@5.0.1:
     resolution: {integrity: sha512-+QU2zd6OTD8XWIJCbffaiQeH9U73qIqafo1x6V1snCWYGJf6cVE0cDR4D8xRzcEnfI21IFrUPzPGtcPf8AC+Rw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
-
-  written-number@0.11.1:
-    resolution: {integrity: sha512-LhQ68uUnzHH0bwm/QiGA9JwqgadSDOwqB2AIs/LBsrOY6ScqVXKRN2slTCeKAhstDBJ/Of/Yxcjn0pnQmVlmtg==}
 
   xmlbuilder@10.1.1:
     resolution: {integrity: sha512-OyzrcFLL/nb6fMGHbiRDuPup9ljBycsdCypwuyg5AAHvyWzGfChJpCXMG88AGTIMFhGZ9RccFN1e6lhg3hkwKg==}
@@ -8351,8 +8345,6 @@ snapshots:
     dependencies:
       imurmurhash: 0.1.4
       signal-exit: 4.1.0
-
-  written-number@0.11.1: {}
 
   xmlbuilder@10.1.1: {}
 
