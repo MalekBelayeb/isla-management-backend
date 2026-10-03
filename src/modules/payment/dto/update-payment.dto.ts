@@ -12,7 +12,7 @@ export const updatePaymentSchema = z.object({
   method: z.enum(PaymentMethodType),
   category: z.enum(PaymentCategory),
   agreementId: z.string().optional(),
-  matriculeProperty: z.number().optional(),
+  propertyId: z.string().optional(),
   label: z.string().optional(),
   paymentDate: z.coerce.date().optional(),
   rentStartDate: z.coerce.date().optional(),

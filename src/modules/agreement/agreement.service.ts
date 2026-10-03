@@ -26,7 +26,7 @@ export class AgreementService {
         },
       },
     });
-    console.log(tenantWithActiveAgreement);
+
     if (tenantWithActiveAgreement?.agreements?.length) {
       throw new HttpException(
         consts.message.tenantAlreadyHasAgreement,
@@ -127,7 +127,12 @@ export class AgreementService {
           },
         }),
       ...(tenantName && {
-        tenant: { fullname: { contains: tenantName, mode: 'insensitive' } },
+        tenant: {
+          OR: [
+            { fullname: { contains: tenantName, mode: 'insensitive' } },
+            { societyName: { contains: tenantName, mode: 'insensitive' } },
+          ],
+        },
       }),
       ...(apartmentAdress && {
         apartment: {
@@ -186,6 +191,10 @@ export class AgreementService {
                     select: {
                       fullname: true,
                       gender: true,
+                      type: true,
+                      society: true,
+                      firstname: true,
+                      lastname: true,
                     },
                   },
                 },
@@ -196,8 +205,12 @@ export class AgreementService {
             select: {
               id: true,
               matricule: true,
+              firstname: true,
+              lastname: true,
               gender: true,
               fullname: true,
+              type: true,
+              societyName: true,
             },
           },
         },
@@ -239,6 +252,11 @@ export class AgreementService {
                   select: {
                     fullname: true,
                     gender: true,
+                    firstname: true,
+                    lastname: true,
+                    type: true,
+                    society: true,
+                    id: true,
                   },
                 },
               },
@@ -249,8 +267,12 @@ export class AgreementService {
           select: {
             id: true,
             matricule: true,
+            firstname: true,
+            lastname: true,
             gender: true,
             fullname: true,
+            type: true,
+            societyName: true,
           },
         },
       },

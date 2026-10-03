@@ -12,7 +12,7 @@ export const createPaymentSchema = z.object({
   category: z.enum(PaymentCategory),
   method: z.enum(PaymentMethodType),
   agreementId: z.string().optional(),
-  matriculeProperty: z.number().optional(),
+  propertyId: z.string().optional(),
   label: z.coerce.string().optional(),
   rentStartDate: z.coerce.date().optional(),
   rentEndDate: z.coerce.date().optional(),

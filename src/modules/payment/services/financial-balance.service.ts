@@ -28,7 +28,7 @@ export class FinancialBalanceService {
     };
 
     const types = type?.split(',') ?? [];
-    
+
     const financialBalance = await this.calculateFinancialBalanceByDateInterval(
       paymentDateIntervalCriteria,
       types,
@@ -116,10 +116,12 @@ export class FinancialBalanceService {
           select: {
             matricule: true,
             profitInPercentage: true,
+            owner: true,
           },
         },
         agreementId: true,
         paymentDate: true,
+
         agreement: {
           select: {
             id: true,
@@ -134,6 +136,7 @@ export class FinancialBalanceService {
                   select: {
                     matricule: true,
                     profitInPercentage: true,
+                    owner: true,
                   },
                 },
               },
@@ -143,6 +146,10 @@ export class FinancialBalanceService {
                 id: true,
                 fullname: true,
                 gender: true,
+                societyName: true,
+                type: true,
+                firstname: true,
+                lastname: true,
               },
             },
           },
@@ -152,7 +159,6 @@ export class FinancialBalanceService {
         paymentDate: 'asc',
       },
     });
-    console.log(whereCriteria);
 
     // get sum of expenses and sum of incomes by criteria
     const groupedSums = await this.prisma.payment.groupBy({

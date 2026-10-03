@@ -5,7 +5,9 @@ export class TenantMapper {
   constructor() {}
 
   addStatusToTenants(tenants: unknown) {
-    if (!Array.isArray(tenants)) return [];
+    if (!Array.isArray(tenants)) {
+      return [];
+    }
 
     const results = tenants.map((item) => {
       const agreement =

@@ -21,18 +21,10 @@ export class PrismaService
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
-    const adapter = new PrismaPg(pool);
+    const adapter = new PrismaPg(pool, { schema: 'isla-db-schema' });
     super({
       adapter,
-      log:
-        process.env.NODE_ENV === 'production'
-          ? ['info', 'warn', 'error']
-          : [
-              { emit: 'event', level: 'query' },
-              { emit: 'event', level: 'error' },
-              { emit: 'event', level: 'warn' },
-              { emit: 'event', level: 'info' },
-            ],
+      log: ['info', 'warn', 'error'],
     });
   }
 

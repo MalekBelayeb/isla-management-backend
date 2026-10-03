@@ -25,8 +25,8 @@ import {
 } from './dto/update-tenant.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { defaultLimitValue } from '../../shared/contants/constants';
+import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 
 @Controller('api/tenant')
 export class TenantController {
@@ -60,6 +60,21 @@ export class TenantController {
       tenantProperty,
       tenantAgreement,
       statusTenant,
+      limit,
+      page,
+    });
+  }
+
+  @Get('/late-payers')
+  @UseGuards(JwtAuthGuard)
+  findAllLatePayers(
+    @Query('searchTerm') searchTerm?: string,
+    @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
+    limit?: number,
+    @Query('page') page?: number,
+  ) {
+    return this.tenantService.findAllLatePayers({
+      searchTerm,
       limit,
       page,
     });

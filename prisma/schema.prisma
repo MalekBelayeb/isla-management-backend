@@ -90,22 +90,30 @@ model Apartment {
 }
 
 model Tenant {
-  id          String      @id @default(uuid())
-  matricule   Int         @default(autoincrement())
-  firstname   String
-  lastname    String
-  fullname    String      @default("")
-  email       String      @default("")
-  gender      GenderType  @default(M)
-  cin         String
-  phoneNumber String
-  nationality String
-  address     String      @default("")
-  job         String      @default("")
-  createdAt   DateTime    @default(now())
-  isArchived  Boolean     @default(false)
-  agreements  Agreement[]
-  Payment     Payment[]
+  id          String          @id @default(uuid())
+  matricule   Int             @default(autoincrement())
+  type        TenantType      @default(natural)
+  firstname   String          @default("")
+  lastname    String          @default("")
+  fullname    String          @default("")
+  email       String          @default("")
+  gender      GenderType      @default(M)
+  cin         String          @default("")
+  phoneNumber String          @default("")
+  nationality NationalityType @default(tn)
+  address     String          @default("")
+  job         String          @default("")
+  createdAt   DateTime        @default(now())
+  isArchived  Boolean         @default(false)
+
+  societyName        String @default("")
+  managerCin         String @default("")
+  managerFirstname   String @default("")
+  managerLastname    String @default("")
+  managerPhoneNumber String @default("")
+
+  agreements Agreement[]
+  Payment    Payment[]
 
   @@index([email])
   @@index([cin])
@@ -236,6 +244,11 @@ enum PaymentType {
   income
   expense
   expense_agency
+}
+
+enum TenantType {
+  natural
+  legal
 }
 
 enum PaymentCategory {

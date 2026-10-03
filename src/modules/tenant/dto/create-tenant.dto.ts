@@ -3,20 +3,28 @@ import {
   GenderType,
   NationalityType,
   PropertyType,
+  TenantType,
 } from '@prisma/client';
 import { z } from 'zod';
 
 export const createTenantDtoSchema = z.object({
-  firstname: z.string(),
-  lastname: z.string(),
-  cin: z.coerce.string(),
-  phoneNumber: z.coerce.string(),
-  nationality: z.enum(NationalityType),
-  gender: z.enum(GenderType),
+  firstname: z.string().optional(),
+  lastname: z.string().optional(),
+  tenantType: z.enum(TenantType).optional(),
+  societyName: z.string().optional(),
+  cin: z.coerce.string().optional(),
+  phoneNumber: z.coerce.string().optional(),
+  nationality: z.enum(NationalityType).optional(),
+  gender: z.enum(GenderType).optional(),
   address: z.string().optional(),
   job: z.string().optional(),
   email: z.string().optional(),
   label: z.string().optional(),
+
+  managerCin: z.string().optional(),
+  managerFirstname: z.string().optional(),
+  managerLastname: z.string().optional(),
+  managerPhoneNumber: z.string().optional(),
 });
 
 export type CreateTenantDtoType = z.infer<typeof createTenantDtoSchema>;

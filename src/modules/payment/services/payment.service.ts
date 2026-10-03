@@ -30,27 +30,6 @@ export class PaymentService {
     }
   }
   async create(createPaymentDto: CreatePaymentDtoType) {
-    let propertyId = '';
-    if (
-      createPaymentDto.type === 'expense' &&
-      createPaymentDto.matriculeProperty &&
-      !isNaN(+createPaymentDto.matriculeProperty)
-    ) {
-      const property = await this.prisma.property.findFirst({
-        where: {
-          isArchived: false,
-          matricule: Number(createPaymentDto.matriculeProperty),
-        },
-      });
-      if (!property) {
-        throw new HttpException(
-          consts.message.propertyNotFound,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      propertyId = property.id;
-    }
-
     if (
       createPaymentDto.type === 'income' &&
       createPaymentDto.category === 'rent'
@@ -72,8 +51,8 @@ export class PaymentService {
         ...(createPaymentDto.agreementId && {
           agreementId: createPaymentDto.agreementId,
         }),
-        ...(propertyId && {
-          propertyId,
+        ...(createPaymentDto.propertyId && {
+          propertyId: createPaymentDto.propertyId,
         }),
         ...(createPaymentDto.tva && {
           tva: createPaymentDto.tva,
@@ -176,8 +155,13 @@ export class PaymentService {
               address: true,
               owner: {
                 select: {
+                  id: true,
                   gender: true,
+                  firstname: true,
+                  lastname: true,
                   fullname: true,
+                  type: true,
+                  society: true,
                 },
               },
             },
@@ -204,8 +188,13 @@ export class PaymentService {
                       address: true,
                       owner: {
                         select: {
+                          id: true,
                           gender: true,
+                          firstname: true,
+                          lastname: true,
                           fullname: true,
+                          type: true,
+                          society: true,
                         },
                       },
                     },
@@ -216,7 +205,11 @@ export class PaymentService {
                 select: {
                   id: true,
                   fullname: true,
+                  firstname: true,
+                  lastname: true,
                   gender: true,
+                  societyName: true,
+                  type: true,
                 },
               },
             },
@@ -266,6 +259,10 @@ export class PaymentService {
               select: {
                 gender: true,
                 fullname: true,
+                firstname: true,
+                lastname: true,
+                type: true,
+                society: true,
               },
             },
           },
@@ -289,6 +286,10 @@ export class PaymentService {
                       select: {
                         gender: true,
                         fullname: true,
+                        firstname: true,
+                        lastname: true,
+                        type: true,
+                        society: true,
                       },
                     },
                   },
@@ -300,6 +301,10 @@ export class PaymentService {
                 id: true,
                 fullname: true,
                 gender: true,
+                firstname: true,
+                lastname: true,
+                societyName: true,
+                type: true,
               },
             },
           },
@@ -310,27 +315,6 @@ export class PaymentService {
   }
 
   async update(id: string, updatePaymentDto: UpdatePaymentDtoType) {
-    let propertyId = '';
-    if (
-      updatePaymentDto.type === 'expense' &&
-      updatePaymentDto.matriculeProperty &&
-      !isNaN(+updatePaymentDto.matriculeProperty)
-    ) {
-      const property = await this.prisma.property.findFirst({
-        where: {
-          isArchived: false,
-          matricule: Number(updatePaymentDto.matriculeProperty),
-        },
-      });
-      if (!property) {
-        throw new HttpException(
-          consts.message.propertyNotFound,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      propertyId = property.id;
-    }
-
     if (
       updatePaymentDto.type === 'income' &&
       updatePaymentDto.category === 'rent'
@@ -354,9 +338,9 @@ export class PaymentService {
         transferNumber: updatePaymentDto.transferNumber,
         checkNumber: updatePaymentDto.checkNumber,
         category: updatePaymentDto.category,
-        ...(propertyId &&
+        ...(updatePaymentDto.propertyId &&
           updatePaymentDto.type === 'expense' && {
-            propertyId,
+            propertyId: updatePaymentDto.propertyId,
           }),
         ...(updatePaymentDto.agreementId &&
           updatePaymentDto.type === 'income' && {

@@ -1,6 +1,5 @@
 # compiled output
 /dist
-/prisma
 /node_modules
 /build
 # Logs

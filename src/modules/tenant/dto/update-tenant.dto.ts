@@ -1,18 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GenderType, PropertyType } from '@prisma/client';
+import {
+  GenderType,
+  NationalityType,
+  PropertyType,
+  TenantType,
+} from '@prisma/client';
 import { z } from 'zod';
 
 export const updateTenantDtoSchema = z.object({
-  firstname: z.string(),
-  lastname: z.string(),
-  cin: z.string(),
-  phoneNumber: z.string(),
-  nationality: z.string(),
-  address: z.string(),
-  job: z.string(),
-  email: z.string(),
-  gender: z.enum(GenderType),
-  label: z.string().optional(),
+  firstname: z.string().optional(),
+  lastname: z.string().optional(),
+  cin: z.string().optional(),
+  tenantType: z.enum(TenantType).optional(),
+  societyName: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  nationality: z.enum(NationalityType).optional(),
+  address: z.string().optional(),
+  job: z.string().optional(),
+  email: z.string().optional(),
+  gender: z.enum(GenderType).optional(),
+  label: z.string().optional().optional(),
+
+  managerCin: z.string().optional(),
+  managerFirstname: z.string().optional(),
+  managerLastname: z.string().optional(),
+  managerPhoneNumber: z.string().optional(),
 });
 
 export type UpdateTenantDtoType = z.infer<typeof updateTenantDtoSchema>;
