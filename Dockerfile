@@ -41,8 +41,10 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Copy app source
 COPY . .
 
-# 🧩 Run Prisma migration (this also generates the client)
-#RUN pnpm prisma:migrate
+# 🧩 Generate the Prisma client before compiling: `nest build` needs its types.
+# pnpm 10 skips dependency install scripts, so @prisma/client won't do it itself.
+# Migrations still run at container start (start:prod), when the DB is reachable.
+RUN pnpm exec prisma generate
 
 # 🏗️ Build your NestJS project (optional if you have dist/)
 RUN pnpm build

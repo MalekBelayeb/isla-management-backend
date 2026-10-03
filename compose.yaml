@@ -1,6 +1,10 @@
 services:
   server:
+    # Build from the code in this directory; never pull a prebuilt image
+    build:
+      context: .
     image: malekbelayeb/isla-management:latest
+    pull_policy: build
     container_name: isla-management
     environment:
       NODE_ENV: production
