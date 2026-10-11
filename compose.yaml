@@ -1,11 +1,9 @@
 services:
   server:
-    # Build from the code in this directory; never pull a prebuilt image
-    build:
-      context: .
-    image: malekbelayeb/isla-management:latest
-    pull_policy: build
+    image: ghcr.io/malekbelayeb/isla-management:latest
+    pull_policy: always
     container_name: isla-management
+    restart: unless-stopped
     environment:
       NODE_ENV: production
     ports:

@@ -4,7 +4,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Req,
   Res,
   UseGuards,
   UsePipes,
@@ -30,7 +29,7 @@ import { type FastifyReply } from 'fastify';
 import { JwtAuthGuard } from '../../../core/guards/jwt-auth-guard';
 import { config } from '../../../core/config';
 import { ApiResponseDto } from '../../../core/models/api.response.dto';
-import { ZodValidationPipe } from 'nestjs-zod';
+import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 
 @ApiTags('Auth')
 @Controller('api/auth')

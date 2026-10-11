@@ -26,8 +26,8 @@ import {
   type UpdateOwnerDtoType,
 } from './dto/update-owner.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { defaultLimitValue } from '../../shared/contants/constants';
+import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
 
 @Controller('api/owner')
 export class OwnerController {

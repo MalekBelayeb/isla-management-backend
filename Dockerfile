@@ -11,32 +11,24 @@ ARG PNPM_VERSION=10.20.0
 
 FROM node:${NODE_VERSION}-alpine
 
-# Use production node environment by default.
-ENV NODE_ENV production
+# Make PNPM_VERSION available inside this stage
+ARG PNPM_VERSION
 
-#RUN apt-get update && apt-get install -y \
-#    libreoffice \
-#    fonts-dejavu \
-#    fonts-liberation \
-#    fonts-freefont-ttf \
-#    && rm -rf /var/lib/apt/lists/*
+# Use production node environment by default.
+ENV NODE_ENV=production
 
 # Install pnpm.
 RUN --mount=type=cache,target=/root/.npm \
-    npm install -g pnpm@${PNPM_VERSION}
-
-
-
-
+    npm install -g pnpm@${PNPM_VERSION} \
+    && pnpm --version
 
 WORKDIR /usr/src/app
 
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
+    --mount=type=bind,source=pnpm-workspace.yaml,target=pnpm-workspace.yaml \
     --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
-
-
 
 # Copy app source
 COPY . .
