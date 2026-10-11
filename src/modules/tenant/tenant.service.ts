@@ -43,8 +43,7 @@ export class TenantService {
     searchTerm,
     agreementId,
     apartmentId,
-    tenantAgreement,
-    tenantProperty,
+    propertyId,
     limit,
     page,
   }: TenantFindAllArgs) {
@@ -80,32 +79,18 @@ export class TenantService {
             { societyName: { contains: searchTerm, mode: 'insensitive' } },
           ],
         }),
-      ...(tenantAgreement &&
-        !isNaN(+tenantAgreement) && {
-          agreements: {
-            some: {
-              status: 'ACTIVE',
+      ...(propertyId && {
+        agreements: {
+          some: {
+            status: 'ACTIVE',
+            isArchived: false,
+            apartment: {
               isArchived: false,
-              matricule: Number(tenantAgreement),
+              property: { isArchived: false, id: propertyId },
             },
           },
-        }),
-      ...(tenantProperty &&
-        !isNaN(+tenantProperty) && {
-          agreements: {
-            some: {
-              isArchived: false,
-              status: 'ACTIVE',
-              apartment: {
-                isArchived: false,
-                property: {
-                  isArchived: false,
-                  matricule: Number(tenantProperty),
-                },
-              },
-            },
-          },
-        }),
+        },
+      }),
       ...(agreementId && {
         agreements: {
           some: { status: 'ACTIVE', isArchived: false, id: agreementId },
@@ -116,7 +101,7 @@ export class TenantService {
           some: {
             status: 'ACTIVE',
             isArchived: false,
-            apartment: { id: apartmentId },
+            apartment: { isArchived: false, id: apartmentId },
           },
         },
       }),
@@ -197,15 +182,8 @@ export class TenantService {
         now.getFullYear(),
         now.getMonth(),
         1,
-        23,
-        59,
-      );
-      const firstDayOfCurrentMonthWithTolerenceDays = new Date(
-        firstDayOfCurrentMonth,
-      );
-
-      firstDayOfCurrentMonthWithTolerenceDays.setDate(
-        firstDayOfCurrentMonth.getDate(),
+        0,
+        0,
       );
 
       const whereCriteria = {

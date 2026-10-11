@@ -45,10 +45,8 @@ export class TenantController {
   findAll(
     @Query('searchTerm') searchTerm?: string,
     @Query('apartmentId') apartmentId?: string,
-    @Query('statusTenant') statusTenant?: string,
     @Query('agreementId') agreementId?: string,
-    @Query('tenantProperty') tenantProperty?: string,
-    @Query('tenantAgreement') tenantAgreement?: string,
+    @Query('propertyId') propertyId?: string,
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
     @Query('page') page?: number,
@@ -57,9 +55,7 @@ export class TenantController {
       searchTerm,
       agreementId,
       apartmentId,
-      tenantProperty,
-      tenantAgreement,
-      statusTenant,
+      propertyId,
       limit,
       page,
     });

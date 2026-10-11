@@ -3,6 +3,7 @@ export type PaymentFindAllArgs = {
   apartmentId?: string;
   ownerId?: string;
   tenantId?: string;
+  propertyId?: string;
   startDate?: string;
   endDate?: string;
   paymentProperty?: string;

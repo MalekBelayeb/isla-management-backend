@@ -54,9 +54,7 @@ export class PaymentService {
         ...(createPaymentDto.propertyId && {
           propertyId: createPaymentDto.propertyId,
         }),
-        ...(createPaymentDto.tva && {
-          tva: createPaymentDto.tva,
-        }),
+        tva: createPaymentDto.tva ?? 0,
         notes: createPaymentDto.notes,
         label: createPaymentDto.label,
         rentStartDate: createPaymentDto.rentStartDate,
@@ -71,6 +69,7 @@ export class PaymentService {
     apartmentId,
     ownerId,
     tenantId,
+    propertyId,
     startDate,
     paymentType,
     paymentAgreement,
@@ -95,6 +94,7 @@ export class PaymentService {
           },
         };
     }
+
     const whereCriteria = {
       isArchived: false,
       ...(createdAtCriteria && createdAtCriteria),
@@ -102,15 +102,85 @@ export class PaymentService {
       ...((apartmentId ||
         tenantId ||
         agreementId ||
+        ownerId ||
+        propertyId ||
         paymentMethod ||
         paymentType) && {
-        OR: [
-          ownerId && {
-            agreement: { apartment: { property: { ownerId } } },
+        AND: [
+          ...(ownerId
+            ? [
+                {
+                  OR: [
+                    {
+                      agreement: {
+                        isArchived: false,
+                        apartment: {
+                          isArchived: false,
+                          property: {
+                            isArchived: false,
+                            owner: {
+                              isArchived: false,
+                              id: ownerId,
+                            },
+                          },
+                        },
+                      },
+                    },
+                    {
+                      property: {
+                        isArchived: false,
+                        owner: {
+                          isArchived: false,
+                          id: ownerId,
+                        },
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
+          ...(propertyId
+            ? [
+                {
+                  OR: [
+                    {
+                      agreement: {
+                        isArchived: false,
+                        apartment: {
+                          isArchived: false,
+                          property: {
+                            isArchived: false,
+                            id: propertyId,
+                          },
+                        },
+                      },
+                    },
+                    {
+                      property: {
+                        isArchived: false,
+                        id: propertyId,
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
+          apartmentId && {
+            agreement: {
+              isArchived: false,
+              apartment: { isArchived: false, id: apartmentId },
+            },
           },
-          apartmentId && { agreement: { apartmentId, isArchived: false } },
-          tenantId && { agreement: { tenantId, isArchived: false } },
-          agreementId && { agreementId, isArchived: false },
+          tenantId && {
+            agreement: {
+              isArchived: false,
+              tenant: { isArchived: false, id: tenantId },
+            },
+          },
+          agreementId && {
+            isArchived: false,
+            agreement: { isArchived: false, id: agreementId },
+          },
           paymentMethod && {
             method: { in: paymentMethod?.split(',') as PaymentMethodType[] },
             isArchived: false,
@@ -333,7 +403,7 @@ export class PaymentService {
         paymentDate: updatePaymentDto.paymentDate,
         type: updatePaymentDto.type,
         label: updatePaymentDto.label,
-        tva: updatePaymentDto.tva,
+        tva: updatePaymentDto.tva ?? 0,
         bank: updatePaymentDto.bank,
         transferNumber: updatePaymentDto.transferNumber,
         checkNumber: updatePaymentDto.checkNumber,

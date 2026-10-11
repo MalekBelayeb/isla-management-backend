@@ -11,7 +11,6 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
-  Res,
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
@@ -56,6 +55,7 @@ export class PaymentController {
     @Query('agreementId') agreementId?: string,
     @Query('apartmentId') apartmentId?: string,
     @Query('tenantId') tenantId?: string,
+    @Query('propertyId') propertyId?: string,
     @Query('ownerId') ownerId?: string,
     @Query('paymentAgreement') paymentAgreement?: string,
     @Query('paymentProperty') paymentProperty?: string,
@@ -68,6 +68,7 @@ export class PaymentController {
       agreementId,
       apartmentId,
       tenantId,
+      propertyId,
       ownerId,
       paymentMethod,
       paymentType,

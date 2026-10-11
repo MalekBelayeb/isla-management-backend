@@ -90,44 +90,29 @@ export class AgreementService {
     searchTerm,
     apartmentId,
     tenantId,
-    startDate,
-    endDate,
+    propertyId,
     agreementProperty,
     tenantName,
     ownerName,
     apartmentAdress,
-    agreementStatus,
     limit,
     page,
   }: AgreementFindAllArgs) {
-    let createdAtCriteria;
-
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      end.setHours(23, 59, 59, 999);
-      createdAtCriteria = startDate &&
-        endDate && {
-          createdAt: {
-            gte: start,
-            lte: end,
-          },
-        };
-    }
     const whereCriteria = {
       isArchived: false,
-
-      ...(createdAtCriteria && createdAtCriteria),
       ...(agreementProperty &&
         !isNaN(+agreementProperty) && {
           apartment: {
             isArchived: false,
-            property: { matricule: Number(agreementProperty) },
+            property: {
+              isArchived: false,
+              matricule: Number(agreementProperty),
+            },
           },
         }),
       ...(tenantName && {
         tenant: {
+          isArchived: false,
           OR: [
             { fullname: { contains: tenantName, mode: 'insensitive' } },
             { societyName: { contains: tenantName, mode: 'insensitive' } },
@@ -136,30 +121,34 @@ export class AgreementService {
       }),
       ...(apartmentAdress && {
         apartment: {
+          isArchived: false,
           address: { contains: apartmentAdress, mode: 'insensitive' },
         },
       }),
       ...(ownerName && {
         apartment: {
+          isArchived: false,
           property: {
-            owner: { fullname: { contains: ownerName, mode: 'insensitive' } },
+            isArchived: false,
+            owner: {
+              isArchived: false,
+              fullname: { contains: ownerName, mode: 'insensitive' },
+            },
           },
         },
       }),
-      ...((apartmentId || tenantId || searchTerm || agreementStatus) && {
+      ...((apartmentId || tenantId || propertyId || searchTerm) && {
         OR: [
           searchTerm &&
             !isNaN(+searchTerm) && { matricule: Number(searchTerm) },
           apartmentId && { apartmentId },
           tenantId && { tenantId },
-          agreementStatus &&
-            agreementStatus === 'active' && {
-              status: 'ACTIVE',
+          propertyId && {
+            apartment: {
+              isArchived: false,
+              property: { isArchived: false, id: propertyId },
             },
-          agreementStatus &&
-            agreementStatus === 'suspended' && {
-              status: 'SUSPENDED',
-            },
+          },
         ].filter(Boolean),
       }),
     } as Prisma.AgreementWhereInput;
