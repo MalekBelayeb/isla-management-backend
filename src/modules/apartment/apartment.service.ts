@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateApartmentDtoType } from './dto/create-apartment.dto';
 import { UpdateApartmentDtoType } from './dto/update-apartment.dto';
 import { Prisma } from '@prisma/client';
 import { ApartmentFindAllArgs } from './types/apartment.findAll.type';
 import { ApartmentMapper } from './mapper/apartment.mapper';
 import { PrismaService } from '../../infrastructure/prisma.service';
+import { consts } from 'src/shared/contants/constants';
 
 @Injectable()
 export class ApartmentService {
@@ -13,8 +14,23 @@ export class ApartmentService {
     private apartmentMapper: ApartmentMapper,
   ) {}
   async create(createApartmentDto: CreateApartmentDtoType) {
+    const property = await this.prismaService.property.findFirst({
+      where: { id: createApartmentDto.propertyId, isArchived: false },
+      include: { apartments: true },
+    });
+
+    if (!property) {
+      throw new HttpException(
+        consts.message.propertyNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const matricule = `${property.matricule}-${property.apartments.length + 1}`;
+
     await this.prismaService.apartment.create({
       data: {
+        matricule,
         address: createApartmentDto.address,
         type: createApartmentDto.type,
         description: createApartmentDto.description,
@@ -168,6 +184,19 @@ export class ApartmentService {
   }
 
   async update(id: string, updateApartmentDto: UpdateApartmentDtoType) {
+    this.recalculateApartmentMatricules(updateApartmentDto.propertyId);
+
+    const apartment = await this.prismaService.apartment.findFirst({
+      where: { id, isArchived: false },
+    });
+
+    if (!apartment) {
+      throw new HttpException(
+        consts.message.apartmentNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     await this.prismaService.apartment.update({
       where: { id },
       data: {
@@ -178,6 +207,37 @@ export class ApartmentService {
         propertyId: updateApartmentDto.propertyId,
       },
     });
+  }
+
+  private async recalculateApartmentMatricules(propertyId: string) {
+    const property = await this.prismaService.property.findUnique({
+      where: { id: propertyId },
+      select: {
+        matricule: true,
+        apartments: {
+          where: { isArchived: false },
+          orderBy: { createdAt: 'asc' },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!property) {
+      throw new HttpException(
+        consts.message.propertyNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    await this.prismaService.$transaction(
+      property.apartments.map((apartment, index) =>
+        this.prismaService.apartment.update({
+          where: { id: apartment.id },
+          data: {
+            matricule: `${property.matricule}-${index + 1}`,
+          },
+        }),
+      ),
+    );
   }
 
   async remove(id: string) {

@@ -11,6 +11,7 @@ export const consts = {
     tenantAlreadyHasAgreement:
       'Validation failed: The tenant already has an active agreement',
     propertyNotFound: 'Validation failed: Property not found',
+    apartmentNotFound: 'Validation failed: Apartment not found',
     paymentReceiptGenerationFailed:
       'Generation failed: Payment receipt generation failed',
     agreementNotFound: 'Validation failed: Agreement not found',

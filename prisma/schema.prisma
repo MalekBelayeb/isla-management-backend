@@ -69,7 +69,7 @@ model Property {
 
 model Apartment {
   id          String        @id @default(uuid())
-  matricule   Int           @default(autoincrement())
+  matricule   String        @default("")
   address     String
   type        ApartmentType
   description String

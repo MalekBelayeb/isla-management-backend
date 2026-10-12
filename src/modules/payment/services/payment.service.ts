@@ -16,12 +16,14 @@ export class PaymentService {
         id: agreementId,
       },
     });
+
     if (!agreement) {
       throw new HttpException(
         consts.message.agreementNotFound,
         HttpStatus.BAD_REQUEST,
       );
     }
+
     if (agreement.status === 'SUSPENDED') {
       throw new HttpException(
         consts.message.agreementSuspended,
