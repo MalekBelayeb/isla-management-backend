@@ -237,13 +237,17 @@ enum GenderType {
 enum PaymentMethodType {
   cash
   check
+  deposit
   transfer
 }
 
 enum PaymentType {
   income
   expense
+  income_agency
   expense_agency
+  income_bank
+  expense_bank
 }
 
 enum TenantType {

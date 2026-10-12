@@ -30,12 +30,14 @@ import { FinancialBalanceService } from './services/financial-balance.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth-guard';
 import { defaultLimitValue } from '../../shared/contants/constants';
 import { ZodValidationPipe } from 'src/core/pipes/zod.validation.pipe';
+import { FinancialOperationsService } from './services/financial-operations.service';
 
 @Controller('api/payment')
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly financialBalanceService: FinancialBalanceService,
+    private readonly financialOperationsService: FinancialOperationsService,
   ) {}
 
   @Post()
@@ -106,6 +108,35 @@ export class PaymentController {
       apartmentId,
       paymentMethod,
       type,
+    });
+  }
+
+  @Get('financial-operations')
+  @UseGuards(JwtAuthGuard)
+  findFinancialOperations(
+    @Query('ownerId') ownerId?: string,
+    @Query('propertyId') propertyId?: string,
+    @Query('agreementId') agreementId?: string,
+    @Query('paymentMethod') paymentMethod?: string,
+    @Query('apartmentId') apartmentId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('type') type?: string,
+    @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
+    limit?: number,
+    @Query('page') page?: number,
+  ) {
+    return this.financialOperationsService.findFinancialOperations({
+      ownerId,
+      propertyId,
+      startDate,
+      endDate,
+      agreementId,
+      apartmentId,
+      paymentMethod,
+      type,
+      page,
+      limit,
     });
   }
 

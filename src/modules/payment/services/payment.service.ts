@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePaymentDtoType } from '../dto/create-payment.dto';
 import { UpdatePaymentDtoType } from '../dto/update-payment.dto';
-import { PaymentMethodType, Prisma } from '@prisma/client';
+import { PaymentMethodType, PaymentType, Prisma } from '@prisma/client';
 import { PaymentFindAllArgs } from '../types/payment.findAll.type';
 import { PrismaService } from '../../../infrastructure/prisma.service';
 import { consts } from '../../../shared/contants/constants';
@@ -100,7 +100,15 @@ export class PaymentService {
     const whereCriteria = {
       isArchived: false,
       ...(createdAtCriteria && createdAtCriteria),
-      type: { not: 'expense_agency' },
+      // agency and bank operations have their own lists (finance module)
+      type: {
+        notIn: [
+          'expense_agency',
+          'income_agency',
+          'income_bank',
+          'expense_bank',
+        ] as PaymentType[],
+      },
       ...((apartmentId ||
         tenantId ||
         agreementId ||
