@@ -9,4 +9,5 @@ export type FinancialOperationsFindArgs = {
   type?: string;
   limit?: number;
   page?: number;
+  filterType: string;
 };

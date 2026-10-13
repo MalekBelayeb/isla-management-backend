@@ -125,6 +125,7 @@ export class PaymentController {
     @Query('limit', new DefaultValuePipe(defaultLimitValue), ParseIntPipe)
     limit?: number,
     @Query('page') page?: number,
+    @Query('filterType') filterType?: string,
   ) {
     return this.financialOperationsService.findFinancialOperations({
       ownerId,
@@ -136,6 +137,7 @@ export class PaymentController {
       paymentMethod,
       type,
       page,
+      filterType: filterType ?? 'OR',
       limit,
     });
   }

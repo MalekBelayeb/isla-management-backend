@@ -24,8 +24,6 @@ export class FinancialOperationsService {
       lte: end,
     };
 
-    const types = type?.split(',') ?? [];
-
     const { ownerId, propertyId, agreementId, apartmentId, paymentMethod } =
       financialBalanceArgs;
 
@@ -43,12 +41,12 @@ export class FinancialOperationsService {
 
       AND: [
         // Type OR payment method
-        ...(types.length || paymentMethod
+        ...(type || paymentMethod
           ? [
               {
-                OR: [
-                  ...(types.length
-                    ? [{ type: { in: types as PaymentType[] } }]
+                [financialBalanceArgs.filterType]: [
+                  ...(type
+                    ? [{ type: { in: type.split(',') as PaymentType[] } }]
                     : []),
 
                   ...(paymentMethod
@@ -158,8 +156,6 @@ export class FinancialOperationsService {
 
     const financialBalance =
       await this.calculateFinancialBalanceByDateInterval(whereCriteria);
-
-    console.log(financialBalance);
 
     return {
       payments,
